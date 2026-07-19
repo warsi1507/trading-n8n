@@ -1,19 +1,15 @@
 import { useState, useCallback } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/react';
 import type { OnNodesChange, OnEdgesChange, OnConnect, Node, Edge } from '@xyflow/react';
-import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { TriggerSheet } from './TriggerSheet';
+
+export type Nodekind = "price-trigger" | "timer-trigger" | "hyperliquid" | "backpack" | "lighter"
+export type NodeMetadata = any;
 
 type NodeData = {
-  type: "action" | "trigger"
-  kind: "price-trigger" | "timer-trigger" | "hyperliquid" | "backpack" | "lighter"
+  type: "action" | "trigger",
+  kind: Nodekind
+  metadata: NodeMetadata
 };
 
 type NodeType = Node<NodeData>;
@@ -36,22 +32,18 @@ export default function CreateWorkflow() {
   );
 
   return (
-    <div className="w-screen h-screen">
-      <div className="absolute top-4 right-4 z-10">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button>Settings</Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Workflow Settings</SheetTitle>
-              <SheetDescription>
-                Configure the global properties of your current workflow here.
-              </SheetDescription>
-            </SheetHeader>
-          </SheetContent>
-        </Sheet>
-      </div>
+    <div style={{width: '100vw', height: '100vh'}}>
+      {!nodes.length && <TriggerSheet onSelect={(kind, metadata) => {
+        setNodes([...nodes, { 
+          id: Math.random().toString(), 
+          data: {
+            type: "trigger",
+            kind,
+            metadata
+          },
+          position: {x:0, y:0}
+        }])
+      }}/>}
       <ReactFlow
         nodes={nodes}
         edges={edges}
