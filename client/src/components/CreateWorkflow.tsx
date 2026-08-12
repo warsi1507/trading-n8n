@@ -8,8 +8,9 @@ export type NodeMetadata = any;
 
 type NodeData = {
   type: "action" | "trigger",
-  kind: Nodekind
-  metadata: NodeMetadata
+  kind: Nodekind,
+  metadata: NodeMetadata,
+  label: String
 };
 
 type NodeType = Node<NodeData>;
@@ -17,6 +18,7 @@ type NodeType = Node<NodeData>;
 export default function CreateWorkflow() {
   const [nodes, setNodes] = useState<NodeType[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [isTriggerSheetOpen, setIsTriggerSheetOpen] = useState(true);
 
   const onNodesChange: OnNodesChange<NodeType> = useCallback(
     (changes) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -33,13 +35,16 @@ export default function CreateWorkflow() {
 
   return (
     <div style={{width: '100vw', height: '100vh'}}>
-      {!nodes.length && <TriggerSheet onSelect={(kind, metadata) => {
+      {isTriggerSheetOpen && !nodes.length && <TriggerSheet 
+        onClose={() => setIsTriggerSheetOpen(false)}
+        onSelect={(kind, metadata) => {
         setNodes([...nodes, { 
           id: Math.random().toString(), 
           data: {
             type: "trigger",
             kind,
-            metadata
+            metadata,
+            label: kind
           },
           position: {x:0, y:0}
         }])
