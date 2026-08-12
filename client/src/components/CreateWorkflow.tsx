@@ -3,14 +3,14 @@ import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge } from '@xyflow/
 import type { OnNodesChange, OnEdgesChange, OnConnect, Node, Edge } from '@xyflow/react';
 import { TriggerSheet } from './TriggerSheet';
 
-export type Nodekind = "price-trigger" | "timer-trigger" | "hyperliquid" | "backpack" | "lighter"
+export type Nodekind = "price-trigger" | "time-trigger" | "hyperliquid" | "backpack" | "lighter"
 export type NodeMetadata = any;
 
 type NodeData = {
   type: "action" | "trigger",
   kind: Nodekind,
   metadata: NodeMetadata,
-  label: String
+  label: string
 };
 
 type NodeType = Node<NodeData>;

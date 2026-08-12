@@ -1,5 +1,7 @@
 import type { Nodekind, NodeMetadata } from "./CreateWorkflow";
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Sheet,
   SheetClose,
@@ -19,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from "react";
+import type { PriceTriggerMetadata } from "@/nodes/triggers/PriceTrigger";
+import type { TimeTriggerMetadata } from "@/nodes/triggers/TimeTrigger";
 
 
 interface TriggerSheetProps {
@@ -29,8 +33,8 @@ interface TriggerSheetProps {
 
 const SUPPORTED_TRIGGERS = [
 {
-    id: "timer-trigger",
-    title: "Timer",
+    id: "time-trigger",
+    title: "Time Trigger",
     description: "Run on a set time interval"
 },
 {
@@ -38,11 +42,17 @@ const SUPPORTED_TRIGGERS = [
     title: "Price Trigger",
     description: "Runs whenever the price of an asset goes above or below a certain amount"
 }
-] as const;
+];
+
+const SUPPORTED_ASSET = ["SOL", "BTC", "ETH"];
 
 export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
 {
-    const [metadata] = useState({});
+    const [metadata, setMetadata] = useState<Partial<PriceTriggerMetadata & TimeTriggerMetadata>>({
+        asset: "",
+        price: 0,
+        time: 0
+    });
     const [selectedTrigger, setSelectedTrigger] = useState<Nodekind | undefined>();
 
     return (
@@ -78,6 +88,54 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
                   </SelectGroup>
               </SelectContent>
               </Select>
+
+              {selectedTrigger === "time-trigger" && (
+                <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-foreground">Time Interval (seconds)</Label>
+                        <Input 
+                            type="number" 
+                            value={metadata.time || ""} 
+                            onChange={(e) => setMetadata({ ...metadata, time: parseFloat(e.target.value) || 0 })}
+                            className="h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
+                            placeholder="e.g. 3600"
+                        />
+                    </div>
+                </div>
+              )}
+
+              {selectedTrigger === "price-trigger" && (
+                <div className="mt-6 space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300"> 
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-foreground">Asset</Label>
+                        <Select value={metadata.asset} onValueChange={(value) => setMetadata({ ...metadata, asset: value })}>
+                            <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
+                                <SelectValue placeholder="Select an asset" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
+                                <SelectGroup>
+                                    {SUPPORTED_ASSET.map((id) => (
+                                        <SelectItem key={id} value={id} className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group">
+                                            <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">{id}</span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-foreground">Target Price (USD)</Label>
+                        <Input 
+                            type="number" 
+                            value={metadata.price || ""} 
+                            onChange={(e) => setMetadata({ ...metadata, price: parseFloat(e.target.value) || 0 })}
+                            className="h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
+                            placeholder="e.g. 60000"
+                        />
+                    </div>
+                </div>
+              )}
             </div>
             <SheetFooter className="mt-auto pt-6 border-t border-border/40 grid grid-cols-2 gap-3 sm:space-x-0">
               <Button 
