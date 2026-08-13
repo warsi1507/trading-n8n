@@ -1,4 +1,4 @@
-import type { Nodekind, NodeMetadata } from "./CreateWorkflow";
+import type { NodeType, NodeMetadata } from "./CreateWorkflow";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,7 +26,7 @@ import type { TimeTriggerMetadata } from "@/nodes/triggers/TimeTrigger";
 
 
 interface TriggerSheetProps {
-    onSelect: (kind: Nodekind, metadata: NodeMetadata) => void;
+    onSelect: (type: NodeType, metadata: NodeMetadata) => void;
     onClose: () => void;
 }
 
@@ -53,7 +53,7 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
         price: 0,
         time: 0
     });
-    const [selectedTrigger, setSelectedTrigger] = useState<Nodekind | undefined>();
+    const [selectedTrigger, setSelectedTrigger] = useState<NodeType | undefined>();
 
     return (
         <Sheet open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -65,7 +65,7 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
             </SheetDescription>
             </SheetHeader>
             <div className="flex-1 flex flex-col">
-              <Select value={selectedTrigger} onValueChange={(val) => setSelectedTrigger(val as Nodekind)}>
+              <Select value={selectedTrigger} onValueChange={(val) => setSelectedTrigger(val as NodeType)}>
               <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium [&_[data-description]]:hidden">
                   <SelectValue placeholder="Select a Trigger" />
               </SelectTrigger>
@@ -141,7 +141,7 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
               <Button 
                 onClick={() => {
                     onSelect(
-                        selectedTrigger as Nodekind,
+                        selectedTrigger as NodeType,
                         metadata
                     )
                 }}
