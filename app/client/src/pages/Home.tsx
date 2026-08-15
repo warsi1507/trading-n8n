@@ -9,10 +9,10 @@ export default function Home() {
             {/* Global Ambient Animated Blobs */}
             
             {/* Left Blob: Bigger and more spread */}
-            <div className="absolute top-[10%] -left-[10%] w-[800px] h-[800px] bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-[150px] animate-blob pointer-events-none"></div>
+            <div className="absolute top-[10%] -left-[10%] w-[600px] h-[600px] bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-[150px] animate-blob pointer-events-none"></div>
             
             {/* Right Blob: Smaller on extreme right end */}
-            <div className="absolute top-[30%] -right-[5%] w-[400px] h-[400px] bg-sky-400/20 dark:bg-sky-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000 pointer-events-none"></div>
+            <div className="absolute top-[30%] right-[5%] w-[400px] h-[400px] bg-sky-400/20 dark:bg-sky-500/10 rounded-full blur-[100px] animate-blob animation-delay-2000 pointer-events-none"></div>
 
             <div className="container px-6 md:px-12 mx-auto grid md:grid-cols-2 gap-12 relative z-10 w-full">
                 {/* Left Side: Text Content */}

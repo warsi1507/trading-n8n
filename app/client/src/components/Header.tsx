@@ -1,24 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun, User, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { Moon, Sun, Settings as SettingsIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react';
 
 export default function Header() {
     const { theme, setTheme } = useTheme();
     const location = useLocation();
 
-    // Mock authentication state for now
-    const isLoggedIn = true;
-
     const navLinks = [
         { path: "/", label: "Home" },
-        { path: "/workflows", label: "Workflows" },
+        { path: "/create-workflow", label: "Workflows" },
         { path: "/about", label: "About" }
     ];
 
@@ -69,33 +61,30 @@ export default function Header() {
                     </Button>
 
                     {/* Auth Section */}
-                    {isLoggedIn ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="secondary" size="icon" className="rounded-full w-9 h-9 border overflow-hidden">
-                                    <User className="h-4 w-4" />
-                                    <span className="sr-only">Toggle user menu</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem asChild className="cursor-pointer">
-                                    <Link to="/settings" className="flex items-center">
-                                        <SettingsIcon className="mr-2 h-4 w-4" />
-                                        <span>Settings</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Logout</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    ) : (
+                    <Show when="signed-in">
+                        <UserButton>
+                            <UserButton.UserProfilePage 
+                                label="Credentials" 
+                                url="credentials" 
+                                labelIcon={<SettingsIcon size={16} />}
+                            >
+                                <div>
+                                    <h1 className="text-xl font-bold mb-4">Credentials</h1>
+                                    <p className="text-muted-foreground">Credentials section is completely empty for now.</p>
+                                </div>
+                            </UserButton.UserProfilePage>
+                        </UserButton>
+                    </Show>
+                    <Show when="signed-out">
                         <div className="flex items-center gap-2">
-                            <Button variant="ghost" className="font-medium">Sign In</Button>
-                            <Button className="font-medium">Sign Up</Button>
+                            <SignInButton mode="modal">
+                                <Button variant="ghost" className="font-medium">Sign In</Button>
+                            </SignInButton>
+                            <SignUpButton mode="modal">
+                                <Button className="font-medium">Sign Up</Button>
+                            </SignUpButton>
                         </div>
-                    )}
+                    </Show>
                 </div>
             </div>
         </header>

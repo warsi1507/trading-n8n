@@ -127,28 +127,52 @@ export default function AnimatedWorkflow() {
                 <g ref={gridRef} id="perspective-grid"></g>
 
                 {/* Animated 3D Elements (Nodes & Cords) */}
-                <g className="animate-graphic-in" style={{ animationDelay: '600ms' }}>
-                    <g fill="none">
+                <g>
+                    {/* Cords (Rendered first so they stay underneath the tiles) */}
+                    {/* Cord 1 */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '800ms' }} fill="none">
                         <use href="#cord1" stroke="rgba(15,23,42,0.20)" strokeWidth="13" transform="translate(0, 12)" filter="url(#cord-blur)"/>
                         <use href="#cord1" stroke="#083344" strokeWidth="8" strokeLinecap="round"/>
                         <use href="#cord1" stroke="url(#cord-gradient-green-blue)" strokeWidth="5" strokeLinecap="round"/>
                         <use href="#cord1" stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
+                    </g>
 
+                    {/* Cord 2 */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '1200ms' }} fill="none">
                         <use href="#cord2" stroke="rgba(15,23,42,0.20)" strokeWidth="13" transform="translate(0, 12)" filter="url(#cord-blur)"/>
                         <use href="#cord2" stroke="#083344" strokeWidth="8" strokeLinecap="round"/>
                         <use href="#cord2" stroke="url(#cord2-gradient)" strokeWidth="5" strokeLinecap="round"/>
                         <use href="#cord2" stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
+                    </g>
 
+                    {/* Cord 3 */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '1600ms' }} fill="none">
                         <use href="#cord3" stroke="rgba(15,23,42,0.20)" strokeWidth="13" transform="translate(0, 12)" filter="url(#cord-blur)"/>
                         <use href="#cord3" stroke="#083344" strokeWidth="8" strokeLinecap="round"/>
                         <use href="#cord3" stroke="url(#cord3-gradient)" strokeWidth="5" strokeLinecap="round"/>
                         <use href="#cord3" stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>        
                     </g>
 
-                    <use href="#tile-blue" transform="translate(450, 80) scale(0.9)" />
-                    <use href="#tile-blue" transform="translate(700, 200) scale(0.9)" />
-                    <use href="#tile-blue" transform="translate(350, 280) scale(0.9)" />
-                    <use href="#tile-green" transform="translate(150, 400) scale(1.0)" />
+                    {/* Tiles (Rendered last so they stay on top) */}
+                    {/* 1. Green Tile (Trigger) */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '600ms' }}>
+                        <use href="#tile-green" transform="translate(150, 400) scale(1.0)" />
+                    </g>
+
+                    {/* 3. Center Blue Tile */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '1000ms' }}>
+                        <use href="#tile-blue" transform="translate(350, 280) scale(0.9)" />
+                    </g>
+
+                    {/* 5. Top Blue Tile */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '1400ms' }}>
+                        <use href="#tile-blue" transform="translate(450, 80) scale(0.9)" />
+                    </g>
+
+                    {/* 7. Right Blue Tile */}
+                    <g className="animate-graphic-in" style={{ animationDelay: '1800ms' }}>
+                        <use href="#tile-blue" transform="translate(700, 200) scale(0.9)" />
+                    </g>
                 </g>
             </svg>
         </div>
