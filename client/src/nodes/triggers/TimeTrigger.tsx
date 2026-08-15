@@ -13,7 +13,7 @@ export function TimeTrigger({ data, isConnectable }: {
 }) {
     return (
         <div>
-            {data.metadata.time / 3600} seconds
+            {data.metadata.time} seconds
             <Handle type="source" position={Position.Right} ></Handle>
         </div>
     )

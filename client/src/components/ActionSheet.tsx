@@ -21,69 +21,61 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from "react";
-import type { PriceTriggerMetadata } from "@/nodes/triggers/PriceTrigger";
-import type { TimeTriggerMetadata } from "@/nodes/triggers/TimeTrigger";
+import { SUPPORTED_ASSETS } from "@/components/TriggerSheet";
+import type { TradingMetadata } from "@/nodes/actions/Lighter";
 
-
-interface TriggerSheetProps {
+interface ActionSheetProps {
     onSelect: (type: NodeType, metadata: NodeMetadata) => void;
     onClose: () => void;
 }
 
-
-const SUPPORTED_TRIGGERS = [
+export const SUPPORTED_ACTIONS = [
 {
-    id: "time-trigger",
-    title: "Time Trigger",
-    description: "Run on a set time interval"
+    id: "hyperliquid",
+    title: "Hyperliquid",
+    description: "Execute trades on Hyperliquid DEX"
 },
 {
-    id: "price-trigger",
-    title: "Price Trigger",
-    description: "Runs whenever the price of an asset goes above or below a certain amount"
+    id: "lighter",
+    title: "Lighter",
+    description: "Execute trades on Lighter DEX"
+},
+{
+    id: "backpack",
+    title: "Backpack",
+    description: "Execute trades on Backpack Exchange"
 }
 ];
 
-export const SUPPORTED_ASSETS = ["SOL", "BTC", "ETH"];
-
-export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
+export function ActionSheet ( { onSelect, onClose } : ActionSheetProps )
 {
-    const [metadata, setMetadata] = useState<Partial<PriceTriggerMetadata & TimeTriggerMetadata>>({
-        asset: "",
-    });
-    const [selectedTrigger, setSelectedTrigger] = useState<NodeType | undefined>();
+    const [metadata, setMetadata] = useState<Partial<TradingMetadata>>({});
+    const [selectedAction, setSelectedAction] = useState<NodeType | undefined>();
     
-    const [timeStr, setTimeStr] = useState("");
-    const [priceStr, setPriceStr] = useState("");
+    const [qtyStr, setQtyStr] = useState("");
 
     // Validation
-    const isTimeInvalid = timeStr !== "" && !/^\d+$/.test(timeStr);
-    const isTimeEmpty = timeStr === "";
-    
-    const isPriceInvalid = priceStr !== "" && !/^\d+(\.\d+)?$/.test(priceStr);
-    const isPriceEmpty = priceStr === "";
-
-    const isTriggerInvalid = !selectedTrigger || 
-        (selectedTrigger === "time-trigger" && (isTimeEmpty || isTimeInvalid)) ||
-        (selectedTrigger === "price-trigger" && (!metadata.asset || isPriceEmpty || isPriceInvalid));
+    const isQtyInvalid = qtyStr !== "" && !/^\d+(\.\d+)?$/.test(qtyStr);
+    const isQtyEmpty = qtyStr === "";
+    const isActionInvalid = !selectedAction || !metadata.symbol || !metadata.type || isQtyEmpty || isQtyInvalid;
 
     return (
         <Sheet open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
         <SheetContent className="flex flex-col sm:max-w-md w-full bg-background/95 backdrop-blur-xl p-8 shadow-2xl border-l-0">
             <SheetHeader className="text-left space-y-2 mb-8">
-            <SheetTitle className="text-2xl font-bold tracking-tight text-foreground">Select Trigger</SheetTitle>
+            <SheetTitle className="text-2xl font-bold tracking-tight text-foreground">Select Action</SheetTitle>
             <SheetDescription className="text-sm text-muted-foreground/80 leading-relaxed">
-                select a trigger for your workflow
+                select an action to perform
             </SheetDescription>
             </SheetHeader>
             <div className="flex-1 flex flex-col">
-              <Select value={selectedTrigger} onValueChange={(val) => setSelectedTrigger(val as NodeType)}>
+              <Select value={selectedAction} onValueChange={(val) => setSelectedAction(val as NodeType)}>
               <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium [&_[data-description]]:hidden">
-                  <SelectValue placeholder="Select a Trigger" />
+                  <SelectValue placeholder="Select an Action" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
                   <SelectGroup>
-                  {SUPPORTED_TRIGGERS.map(({id, title, description}) => ( <>
+                  {SUPPORTED_ACTIONS.map(({id, title, description}) => (
                       <SelectItem 
                           key={id} 
                           value={id} 
@@ -96,33 +88,16 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
                               </span>
                           </div>
                       </SelectItem>
-                  </>))}
+                  ))}
                   </SelectGroup>
               </SelectContent>
               </Select>
-
-              {selectedTrigger === "time-trigger" && (
-                <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium text-foreground">Time Interval (seconds)</Label>
-                        <Input 
-                            type="text" 
-                            inputMode="numeric"
-                            value={timeStr} 
-                            onChange={(e) => setTimeStr(e.target.value)}
-                            className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isTimeInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
-                            placeholder="e.g. 3600"
-                        />
-                        {isTimeInvalid && <p className="text-xs text-red-500 mt-1">not a valid time interval</p>}
-                    </div>
-                </div>
-              )}
-
-              {selectedTrigger === "price-trigger" && (
+              
+              {(selectedAction === "hyperliquid" || selectedAction === "lighter" || selectedAction === "backpack") && (
                 <div className="mt-6 space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300"> 
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium text-foreground">Asset</Label>
-                        <Select value={metadata.asset} onValueChange={(value) => setMetadata({ ...metadata, asset: value })}>
+                        <Label className="text-sm font-medium text-foreground">Asset / Symbol</Label>
+                        <Select value={metadata.symbol} onValueChange={(value) => setMetadata({ ...metadata, symbol: value })}>
                             <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
                                 <SelectValue placeholder="Select an asset" />
                             </SelectTrigger>
@@ -139,33 +114,49 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium text-foreground">Target Price (USD )</Label>
+                        <Label className="text-sm font-medium text-foreground">Order Type</Label>
+                        <Select value={metadata.type} onValueChange={(value: "LONG" | "SHORT") => setMetadata({ ...metadata, type: value })}>
+                            <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
+                                <SelectValue placeholder="Select order type" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
+                                <SelectGroup>
+                                    <SelectItem value="LONG" className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group">
+                                        <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">LONG</span>
+                                    </SelectItem>
+                                    <SelectItem value="SHORT" className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group">
+                                        <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">SHORT</span>
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-foreground">Quantity (qty)</Label>
                         <Input 
-                            type="text" 
+                            type="text"
                             inputMode="decimal"
-                            value={priceStr} 
-                            onChange={(e) => setPriceStr(e.target.value)}
-                            className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isPriceInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
-                            placeholder="e.g. 60000.50"
+                            value={qtyStr} 
+                            onChange={(e) => setQtyStr(e.target.value)}
+                            className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isQtyInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
+                            placeholder="e.g. 1.5"
                         />
-                        {isPriceInvalid && <p className="text-xs text-red-500 mt-1">Not a valid positive price.</p>}
+                        {isQtyInvalid && <p className="text-xs text-red-500 mt-1">Not a valid positive quantity.</p>}
                     </div>
                 </div>
               )}
             </div>
+
             <SheetFooter className="mt-auto pt-6 border-t border-border/40 grid grid-cols-2 gap-3 sm:space-x-0">
               <Button 
                 onClick={() => {
-                    const finalMetadata = { ...metadata };
-                    if (selectedTrigger === "time-trigger") finalMetadata.time = parseInt(timeStr);
-                    if (selectedTrigger === "price-trigger") finalMetadata.price = parseFloat(priceStr);
-                    
                     onSelect(
-                        selectedTrigger as NodeType,
-                        finalMetadata as NodeMetadata
+                        selectedAction as NodeType,
+                        { ...metadata, qty: parseFloat(qtyStr) } as NodeMetadata
                     )
                 }}
-                disabled={isTriggerInvalid}
+                disabled={isActionInvalid}
                 type="submit" 
                 className="w-full h-12 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-200 order-2"
                 >
