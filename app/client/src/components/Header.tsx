@@ -34,7 +34,7 @@ export default function Header() {
                 </div>
 
                 {/* Middle: Navigation Links */}
-                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-medium">
                     {navLinks.map((link) => (
                         <Link 
                             key={link.path} 
