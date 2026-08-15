@@ -1,7 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
-import type { TradingMetadata } from "./Lighter";
+import type { TradingMetadata } from "@trading-n8n/common";
 
-export function Hyperliquid({ data, isConnectable }: { 
+export function Lighter({ data, isConnectable }: { 
     data: {
         metadata: TradingMetadata
     },
@@ -9,7 +9,7 @@ export function Hyperliquid({ data, isConnectable }: {
 }) {
     return (
         <div>
-            Hyperliquid
+            Lighter
             <div> {data.metadata.type} </div>
             <div> {data.metadata.qty} </div>
             <div> {data.metadata.symbol} </div>

@@ -1,4 +1,4 @@
-import type { NodeType, NodeMetadata } from "./CreateWorkflow";
+import type { NodeMetadata } from "./CreateWorkflow";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,17 +21,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from "react";
-import type { PriceTriggerMetadata } from "@/nodes/triggers/PriceTrigger";
-import type { TimeTriggerMetadata } from "@/nodes/triggers/TimeTrigger";
-
+import type { PriceTriggerMetadata, TimeTriggerMetadata, TriggerType, NodeType } from "@trading-n8n/common";
+import { SUPPORTED_ASSETS } from "@trading-n8n/common";
 
 interface TriggerSheetProps {
     onSelect: (type: NodeType, metadata: NodeMetadata) => void;
     onClose: () => void;
 }
 
-
-const SUPPORTED_TRIGGERS = [
+const SUPPORTED_TRIGGERS: { id: TriggerType, title: string, description: string }[] = [
 {
     id: "time-trigger",
     title: "Time Trigger",
@@ -43,8 +41,6 @@ const SUPPORTED_TRIGGERS = [
     description: "Runs whenever the price of an asset goes above or below a certain amount"
 }
 ];
-
-export const SUPPORTED_ASSETS = ["SOL", "BTC", "ETH"];
 
 export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
 {
@@ -128,7 +124,7 @@ export function TriggerSheet ( { onSelect, onClose } : TriggerSheetProps )
                             </SelectTrigger>
                             <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
                                 <SelectGroup>
-                                    {SUPPORTED_ASSETS.map((id) => (
+                                    {SUPPORTED_ASSETS.map((id: string) => (
                                         <SelectItem key={id} value={id} className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group">
                                             <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">{id}</span>
                                         </SelectItem>

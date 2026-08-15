@@ -4,15 +4,12 @@ import type { OnNodesChange, OnEdgesChange, OnConnect, Node, Edge, OnConnectEnd 
 import { TriggerSheet } from './TriggerSheet';
 import { ActionSheet } from './ActionSheet';
 import { PriceTrigger } from '@/nodes/triggers/PriceTrigger';
-import type { PriceTriggerMetadata } from '@/nodes/triggers/PriceTrigger';
 import { TimeTrigger } from '@/nodes/triggers/TimeTrigger';
-import type { TimeTriggerMetadata } from '@/nodes/triggers/TimeTrigger';
 import { Backpack } from '@/nodes/actions/Backpack';
 import { Hyperliquid } from '@/nodes/actions/Hyperliquid';
 import { Lighter } from '@/nodes/actions/Lighter';
-import type { TradingMetadata } from '@/nodes/actions/Lighter';
+import type { PriceTriggerMetadata, TimeTriggerMetadata, TradingMetadata } from '@trading-n8n/common';
 
-export type NodeType = "price-trigger" | "time-trigger" | "hyperliquid" | "backpack" | "lighter"
 export type NodeMetadata = PriceTriggerMetadata | TimeTriggerMetadata | TradingMetadata;
 
 type NodeData = {

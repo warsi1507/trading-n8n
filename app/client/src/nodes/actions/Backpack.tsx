@@ -1,13 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
-import { SUPPORTED_ASSETS } from "@/components/TriggerSheet";
+import type { TradingMetadata } from "@trading-n8n/common";
 
-export type TradingMetadata = {
-    type: "LONG" | "SHORT",
-    qty: number,
-    symbol: string
-}
-
-export function Lighter({ data, isConnectable }: { 
+export function Backpack({ data, isConnectable }: { 
     data: {
         metadata: TradingMetadata
     },
@@ -15,7 +9,7 @@ export function Lighter({ data, isConnectable }: {
 }) {
     return (
         <div>
-            Lighter
+            Backpack
             <div> {data.metadata.type} </div>
             <div> {data.metadata.qty} </div>
             <div> {data.metadata.symbol} </div>

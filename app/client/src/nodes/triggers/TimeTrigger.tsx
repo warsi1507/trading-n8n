@@ -1,15 +1,10 @@
 import { Handle, Position } from "@xyflow/react";
+import type { TimeTriggerMetadata } from "@trading-n8n/common";
 
-export interface TimeTriggerMetadata {
-    asset: string;
-    time: number;
-}
-
-export function TimeTrigger({ data, isConnectable }: { 
+export function TimeTrigger({ data }: { 
     data: {
         metadata: TimeTriggerMetadata 
-    },
-    isConnectable: boolean
+    }
 }) {
     return (
         <div>
