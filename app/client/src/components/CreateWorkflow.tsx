@@ -97,7 +97,7 @@ export default function CreateWorkflow() {
     [screenToFlowPosition],
   );
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     const appNode = node as AppNode;
     if (appNode.data.kind === "trigger") {
       setTriggerSheetState({ isOpen: true, editNode: appNode });
