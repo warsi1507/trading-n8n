@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 import { ReactFlowProvider } from '@xyflow/react';
+import { Show, RedirectToSignIn } from '@clerk/react';
 
 // Providers and Layout
 import { ThemeProvider } from './components/ThemeProvider';
@@ -10,10 +11,21 @@ import Header from './components/Header';
 // Pages
 import Home from './pages/Home';
 import About from './pages/About';
-import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import CreateWorkflow from './components/CreateWorkflow';
 import Workflows from './pages/Workflows';
+
+// Protected Route Wrapper
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Show when="signed-in">{children}</Show>
+      <Show when="signed-out">
+        <RedirectToSignIn />
+      </Show>
+    </>
+  );
+}
 
 function App() {
   return (
@@ -24,15 +36,24 @@ function App() {
             <Header />
             <main className="flex-1">
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/workflows" element={<Workflows />} />
-                <Route path="/create-workflow" element={
-                  <ReactFlowProvider>
-                    <CreateWorkflow />
-                  </ReactFlowProvider>
+                
+                {/* Protected Routes */}
+                <Route path="/workflows" element={
+                  <ProtectedRoute>
+                    <Workflows />
+                  </ProtectedRoute>
                 } />
+                <Route path="/create-workflow" element={
+                  <ProtectedRoute>
+                    <ReactFlowProvider>
+                      <CreateWorkflow />
+                    </ReactFlowProvider>
+                  </ProtectedRoute>
+                } />
+                
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

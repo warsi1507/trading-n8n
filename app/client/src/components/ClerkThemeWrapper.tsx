@@ -15,7 +15,7 @@ export function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
     return (
         <ClerkProvider 
             publishableKey={PUBLISHABLE_KEY} 
-            appearance={{ baseTheme: isDark ? dark : undefined } as any}
+            appearance={{ theme: isDark ? dark : undefined }}
             afterSignOutUrl="/"
             localization={{ userButton: { action__manageAccount: 'Settings' } }}
         >

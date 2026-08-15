@@ -3,6 +3,7 @@ import { Moon, Sun, Settings as SettingsIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react';
+import { dark } from '@clerk/themes';
 
 export default function Header() {
     const { theme, setTheme } = useTheme();
@@ -10,7 +11,7 @@ export default function Header() {
 
     const navLinks = [
         { path: "/", label: "Home" },
-        { path: "/create-workflow", label: "Workflows" },
+        { path: "/workflows", label: "Workflows" },
         { path: "/about", label: "About" }
     ];
 
@@ -62,7 +63,11 @@ export default function Header() {
 
                     {/* Auth Section */}
                     <Show when="signed-in">
-                        <UserButton>
+                        <UserButton
+                            appearance={{
+                                theme: theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? dark : undefined,
+                            }}
+                        >
                             <UserButton.UserProfilePage 
                                 label="Credentials" 
                                 url="credentials" 

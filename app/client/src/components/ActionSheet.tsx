@@ -96,7 +96,7 @@ export function ActionSheet ( { onSelect, onClose } : ActionSheetProps )
               {(selectedAction === "hyperliquid" || selectedAction === "lighter" || selectedAction === "backpack") && (
                 <div className="mt-6 space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300"> 
                     <div className="space-y-2">
-                        <Label className="text-sm font-medium text-foreground">Asset / Symbol</Label>
+                        <Label className="text-sm font-medium text-foreground">Asset</Label>
                         <Select value={metadata.symbol} onValueChange={(value) => setMetadata({ ...metadata, symbol: value })}>
                             <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
                                 <SelectValue placeholder="Select an asset" />
