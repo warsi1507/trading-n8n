@@ -442,7 +442,7 @@ export default function WorkflowEditor() {
               This will move <strong>"{workflowName}"</strong> to the Archive.
               It will be permanently deleted in 30 days.
               <br/><br/>
-              Please type "<strong>{workflowName}</strong>"" to confirm.
+              Please type "<strong>{workflowName}</strong>" to confirm.
             </AlertDialogDescription>
             <Input 
               value={archiveConfirmName} 
