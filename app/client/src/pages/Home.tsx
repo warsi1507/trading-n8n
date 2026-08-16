@@ -1,9 +1,39 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { ArrowRight } from "lucide-react";
 import AnimatedWorkflow from "../components/AnimatedWorkflow";
+import { useAuth, useClerk } from "@clerk/react";
 
 export default function Home() {
+  const { isSignedIn, getToken } = useAuth();
+  const clerk = useClerk();
+  const navigate = useNavigate();
+
+  const handleCreateWorkflow = async () => {
+    if (!isSignedIn) {
+      clerk.openSignIn({ fallbackRedirectUrl: '/workflows' });
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/workflows", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        navigate(`/workflows/${data.display_id}`);
+      } else {
+        navigate('/workflows');
+      }
+    } catch (err) {
+      console.error("Failed to create workflow from home:", err);
+      navigate('/workflows');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center relative overflow-hidden pt-24">
       {/* Global Ambient Animated Blobs */}
@@ -32,15 +62,14 @@ export default function Home() {
             className="animate-fade-slide-up mb-14"
             style={{ animationDelay: "200ms" }}
           >
-            <Link to="/create-workflow">
-              <Button
-                size="lg"
-                className="h-14 px-8 text-lg font-semibold rounded-md shadow-md transition-all hover:scale-105 active:scale-95"
-              >
-                Create Workflow
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              onClick={handleCreateWorkflow}
+              className="h-14 px-8 text-lg font-semibold rounded-md shadow-md transition-all hover:scale-105 active:scale-95"
+            >
+              Create Workflow
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
 
           {/* Bottom Paragraph */}
