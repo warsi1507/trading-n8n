@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Play } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@clerk/react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,68 +22,83 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-type WorkflowStatus = "in-progress" | "deployed";
+type WorkflowStatus = "DRAFT" | "IN_EDIT" | "DEPLOYED";
 
 interface Workflow {
-  id: string;
+  _id: string;
+  display_id: string;
   name: string;
   description: string;
   status: WorkflowStatus;
-  active: boolean;
+  is_active: boolean;
+  updated_at: string;
 }
-
-const mockWorkflows: Workflow[] = [
-  {
-    id: "workflow-123",
-    name: "MACD Crossover",
-    description:
-      "Buys SOL on 15m MACD bullish crossover and sells on bearish. Very tight stop loss.",
-    status: "in-progress",
-    active: false,
-  },
-  {
-    id: "workflow-234",
-    name: "RSI Reversal",
-    description:
-      "Shorts BTC when RSI > 75 on 1H timeframe. Requires strict stop loss and take profit.",
-    status: "deployed",
-    active: true,
-  },
-  {
-    id: "workflow-345",
-    name: "Grid Bot",
-    description:
-      "Simple grid bot for ETH/USDC ranging between $2000-$3000. Rebalances every 1 hour.",
-    status: "deployed",
-    active: false,
-  },
-];
 
 export default function Workflows() {
   const navigate = useNavigate();
-  const [workflows, setWorkflows] = useState<Workflow[]>(mockWorkflows);
+  const { getToken } = useAuth();
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [toggleWorkflow, setToggleWorkflow] = useState<Workflow | null>(null);
 
-  const inProgress = workflows.filter((w) => w.status === "in-progress");
-  const deployed = workflows.filter((w) => w.status === "deployed");
+  useEffect(() => {
+    fetchWorkflows();
+  }, []);
+
+  const fetchWorkflows = async () => {
+    try {
+      setIsLoading(true);
+      const token = await getToken();
+      const res = await fetch("/api/workflows", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error("Failed to fetch workflows");
+      const data = await res.json();
+      setWorkflows(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const inProgress = workflows.filter((w) => w.status === "DRAFT" || w.status === "IN_EDIT");
+  const deployed = workflows.filter((w) => w.status === "DEPLOYED");
 
   const handleToggle = () => {
     if (toggleWorkflow) {
       setWorkflows((prev) =>
         prev.map((w) =>
-          w.id === toggleWorkflow.id ? { ...w, active: !w.active } : w,
+          w._id === toggleWorkflow._id ? { ...w, is_active: !w.is_active } : w,
         ),
       );
       setToggleWorkflow(null);
     }
   };
 
-  const openWorkflow = (id: string) => {
-    navigate(`/create?id=${id}`); // Or wherever the workflow builder is
+  const openWorkflow = (display_id: string) => {
+    navigate(`/workflows/${display_id}`);
   };
 
-  const createWorkflow = () => {
-    navigate("/create");
+  const createWorkflow = async () => {
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/workflows", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) throw new Error("Failed to create workflow");
+      
+      const data = await res.json();
+      navigate(`/workflows/${data.display_id}`);
+    } catch (err) {
+      console.error("Error creating workflow:", err);
+    }
   };
 
   return (
@@ -271,7 +287,7 @@ function WorkflowCard({
       <CardContent className="p-0 flex items-center gap-4 py-4 px-5 min-h-[72px]">
         {/* ID Badge */}
         <div className="shrink-0 hidden sm:flex items-center justify-center font-mono text-[11px] font-medium w-28 truncate border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-1 rounded-md">
-          {workflow.id}
+          {workflow.display_id}
         </div>
 
         {/* Name */}
@@ -285,14 +301,14 @@ function WorkflowCard({
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
                 <div className="text-sm text-muted-foreground truncate cursor-help w-full text-left">
-                  {workflow.description}
+                  {workflow.description || "No description provided."}
                 </div>
               </TooltipTrigger>
               <TooltipContent
                 className="max-w-[300px] p-3 text-sm"
                 sideOffset={8}
               >
-                <p>{workflow.description}</p>
+                <p>{workflow.description || "No description provided."}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -300,16 +316,16 @@ function WorkflowCard({
 
         {/* Action Button Container */}
         <div className="ml-auto shrink-0 flex items-center justify-end min-w-[40px]">
-          {workflow.status === "deployed" && (
+          {workflow.status === "DEPLOYED" && (
             <div className="pl-3 border-l border-gray-200 dark:border-white/10 flex items-center">
               <button
                 onClick={onToggle}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${workflow.active ? "text-green-500 hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "text-muted-foreground hover:bg-accent/30"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${workflow.is_active ? "text-green-500 hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "text-muted-foreground hover:bg-accent/30"}`}
               >
                 <Play
                   size={16}
                   fill="currentColor"
-                  className={workflow.active ? "opacity-100" : "opacity-40"}
+                  className={workflow.is_active ? "opacity-100" : "opacity-40"}
                 />
               </button>
             </div>

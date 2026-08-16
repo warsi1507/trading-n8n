@@ -1,4 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useAuth } from "@clerk/react";
 import {
   ReactFlow,
   applyNodeChanges,
@@ -17,11 +19,11 @@ import type {
   Edge,
   OnConnectEnd,
 } from "@xyflow/react";
-import { TriggerSheet } from "./TriggerSheet";
-import { ActionSheet } from "./ActionSheet";
+import { TriggerSheet } from "../components/TriggerSheet";
+import { ActionSheet } from "../components/ActionSheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Trash } from "lucide-react";
+import { Plus, Play, Trash, Pencil, CheckCircle2 } from "lucide-react";
 import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
@@ -43,9 +45,16 @@ const defaultEdgeOptions = {
   },
 };
 
-export default function CreateWorkflow() {
+export default function WorkflowEditor() {
+  const { display_id } = useParams<{ display_id: string }>();
+  const { getToken } = useAuth();
+  
   const [nodes, setNodes] = useState<AppNode[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState<"DRAFT" | "IN_EDIT" | "DEPLOYED">("DRAFT");
+  const [isValid, setIsValid] = useState(false);
+
   const [triggerSheetState, setTriggerSheetState] = useState<{
     isOpen: boolean;
     editNode?: AppNode;
@@ -56,22 +65,72 @@ export default function CreateWorkflow() {
     editNode?: AppNode;
   } | null>(null);
 
-  const [workflowName, setWorkflowName] = useState("Untitled Workflow");
-  const [workflowDescription, setWorkflowDescription] = useState(
-    "Add a description for your workflow here...",
-  );
+  const [workflowName, setWorkflowName] = useState("");
+  const [workflowDescription, setWorkflowDescription] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [tempName, setTempName] = useState("");
   const [tempDescription, setTempDescription] = useState("");
+
+  const { screenToFlowPosition } = useReactFlow();
+
+  // Load workflow data on mount
+  useEffect(() => {
+    async function loadWorkflow() {
+      if (!display_id) return;
+      try {
+        const token = await getToken();
+        const res = await fetch(`/api/workflows/${display_id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to load workflow");
+        const data = await res.json();
+        
+        setWorkflowName(data.name);
+        setWorkflowDescription(data.description || "");
+        setStatus(data.status);
+        
+        // Load draft version by default for now
+        if (data.draft_version) {
+          setNodes(data.draft_version.nodes || []);
+          setEdges(data.draft_version.edges || []);
+          setIsValid(data.draft_version.is_valid || false);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadWorkflow();
+  }, [display_id, getToken]);
+
+  // Sync basic updates back to DB
+  const saveWorkflowMetadata = async (updates: { name?: string, description?: string }) => {
+    try {
+      const token = await getToken();
+      await fetch(`/api/workflows/${display_id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      });
+    } catch (error) {
+      console.error("Failed to save metadata", error);
+    }
+  };
 
   const handleNameClick = () => {
     setTempName(workflowName);
     setIsEditingName(true);
   };
   const saveName = () => {
-    setWorkflowName(tempName || "Untitled Workflow");
+    const newName = tempName || "Untitled Workflow";
+    setWorkflowName(newName);
     setIsEditingName(false);
+    saveWorkflowMetadata({ name: newName });
   };
 
   const handleDescClick = () => {
@@ -79,13 +138,11 @@ export default function CreateWorkflow() {
     setIsEditingDescription(true);
   };
   const saveDesc = () => {
-    setWorkflowDescription(
-      tempDescription || "Add a description for your workflow here...",
-    );
+    const newDesc = tempDescription;
+    setWorkflowDescription(newDesc);
     setIsEditingDescription(false);
+    saveWorkflowMetadata({ description: newDesc });
   };
-
-  const { screenToFlowPosition } = useReactFlow();
 
   const hasTrigger = nodes.some((n) => n.data.kind === "trigger");
 
@@ -138,6 +195,10 @@ export default function CreateWorkflow() {
       setActionSheetState({ editNode: appNode });
     }
   }, []);
+
+  if (isLoading) {
+    return <div className="h-screen w-full flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div

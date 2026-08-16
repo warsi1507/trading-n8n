@@ -12,7 +12,7 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import CreateWorkflow from "./components/CreateWorkflow";
+import WorkflowEditor from "./pages/WorkflowEditor";
 import Workflows from "./pages/Workflows";
 
 // Protected Route Wrapper
@@ -50,11 +50,11 @@ function App() {
                   }
                 />
                 <Route
-                  path="/create-workflow"
+                  path="/workflows/:display_id"
                   element={
                     <ProtectedRoute>
                       <ReactFlowProvider>
-                        <CreateWorkflow />
+                        <WorkflowEditor />
                       </ReactFlowProvider>
                     </ProtectedRoute>
                   }
