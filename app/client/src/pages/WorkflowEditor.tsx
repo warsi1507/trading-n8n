@@ -29,7 +29,7 @@ import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
 import { Hyperliquid } from "@/nodes/actions/Hyperliquid";
 import { Lighter } from "@/nodes/actions/Lighter";
-import type { AppNode, WorkflowStatus, WorkflowVersion } from "@trading-n8n/common";
+import type { AppNode } from "@trading-n8n/common";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,7 +64,7 @@ export default function WorkflowEditor() {
   const [nodes, setNodes] = useState<AppNode[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState<WorkflowStatus>("DRAFT");
+  const [viewMode, setViewMode] = useState<"draft" | "deployed">("draft");
   const [isValid, setIsValid] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
   const [archiveConfirmName, setArchiveConfirmName] = useState("");
@@ -88,7 +88,7 @@ export default function WorkflowEditor() {
 
   const { screenToFlowPosition } = useReactFlow();
 
-  const isReadOnly = status === "DEPLOYED";
+  const isReadOnly = viewMode === "deployed";
 
   useEffect(() => {
     async function loadWorkflow() {
@@ -104,13 +104,14 @@ export default function WorkflowEditor() {
         setWorkflowData(data);
         setWorkflowName(data.name);
         setWorkflowDescription(data.description || "");
-        setStatus(data.status);
         
-        if (data.status === "DEPLOYED" && data.deployed_version) {
+        if ((data.status === "DEPLOYED" || data.status === "PAUSED") && data.deployed_version) {
+          setViewMode("deployed");
           setNodes(data.deployed_version.nodes || []);
           setEdges(data.deployed_version.edges || []);
           setIsValid(true); // Deployed is implicitly valid
         } else if (data.draft_version) {
+          setViewMode("draft");
           setNodes(data.draft_version.nodes || []);
           setEdges(data.draft_version.edges || []);
           setIsValid(data.draft_version.is_valid || false);
@@ -154,9 +155,6 @@ export default function WorkflowEditor() {
         body: JSON.stringify({ nodes: newNodes, edges: newEdges })
       });
       setIsValid(false);
-      if (status === "DEPLOYED") {
-        setStatus("IN_EDIT");
-      }
     } catch (error) {
       console.error("Failed to save graph", error);
     }
@@ -188,7 +186,7 @@ export default function WorkflowEditor() {
       });
       if (res.ok) {
         const data = await res.json();
-        setStatus("DEPLOYED");
+        setViewMode("deployed");
         setWorkflowData(data);
       }
     } catch (error) {
@@ -197,7 +195,7 @@ export default function WorkflowEditor() {
   };
 
   const handleEditMode = () => {
-    setStatus("IN_EDIT");
+    setViewMode("draft");
     if (workflowData?.draft_version) {
       setNodes(workflowData.draft_version.nodes || []);
       setEdges(workflowData.draft_version.edges || []);
@@ -273,7 +271,7 @@ export default function WorkflowEditor() {
     [isReadOnly, nodes],
   );
 
-  const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
+  const onNodeDragStop = useCallback((_event: any, node: Node) => {
     if (isReadOnly) return;
     const newNodes = nodes.map((n) => (n.id === node.id ? (node as AppNode) : n));
     saveGraphState(newNodes, edges);
@@ -403,12 +401,12 @@ export default function WorkflowEditor() {
         </div>
 
         <div className="flex gap-2 pointer-events-auto mt-0.5 shrink-0">
-          {status === "DEPLOYED" ? (
+          {viewMode === "deployed" ? (
             <Button
               onClick={handleEditMode}
               className="gap-1.5 rounded-lg h-8 px-4 shadow-sm bg-primary text-primary-foreground text-xs font-medium transition-all"
             >
-              <Pencil className="w-3 h-3" /> Edit Draft
+              <Pencil className="w-3 h-3" /> Edit
             </Button>
           ) : isValid ? (
             <Button
@@ -427,9 +425,9 @@ export default function WorkflowEditor() {
           )}
           
           <Button
-            variant="outline"
+            variant="default"
             onClick={() => setIsArchiving(true)}
-            className="gap-1.5 rounded-lg h-8 px-4 border-red-500/20 text-red-500 hover:bg-red-500/10 text-xs font-medium shadow-sm transition-all"
+            className="gap-1.5 rounded-lg h-8 px-4 bg-red-500 hover:bg-red-600 text-white text-xs font-medium shadow-sm transition-all"
           >
             <Trash className="w-3 h-3" /> Delete
           </Button>
@@ -444,7 +442,7 @@ export default function WorkflowEditor() {
               This will move <strong>"{workflowName}"</strong> to the Archive.
               It will be permanently deleted in 30 days.
               <br/><br/>
-              Please type <strong>{workflowName}</strong> to confirm.
+              Please type "<strong>{workflowName}</strong>"" to confirm.
             </AlertDialogDescription>
             <Input 
               value={archiveConfirmName} 

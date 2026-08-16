@@ -33,11 +33,11 @@ router.get('/', async (req: Request, res: Response): Promise<any> => {
       filter.is_archived = true;
     } else if (tab === 'DEPLOYED') {
       filter.is_archived = false;
-      filter.status = 'DEPLOYED';
+      filter.status = { $in: ['DEPLOYED', 'PAUSED'] };
     } else {
       // IN_PROGRESS tab
       filter.is_archived = false;
-      filter.status = { $in: ['DRAFT', 'IN_EDIT'] };
+      filter.status = 'DRAFT';
     }
 
     const skip = (page - 1) * limit;
@@ -181,11 +181,6 @@ router.put('/:display_id', async (req: Request, res: Response): Promise<any> => 
 
       // Invalidate if nodes/edges change so it must be re-validated explicitly via /validate
       workflow.draft_version.is_valid = false;
-
-      // State Transition: Downgrade active workflows to IN_EDIT status upon modification
-      if (workflow.status === 'DEPLOYED') {
-        workflow.status = 'IN_EDIT';
-      }
     }
 
     await workflow.save();
@@ -285,6 +280,39 @@ router.post('/:display_id/deploy', async (req: Request, res: Response): Promise<
     res.json(workflow);
   } catch (error) {
     console.error('Deploy error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/workflows/:display_id/toggle
+ * Toggles a deployed workflow between DEPLOYED (active) and PAUSED (inactive).
+ */
+router.post('/:display_id/toggle', async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { userId } = getAuth(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const user = await User.findOne({ clerk_id: userId });
+    const workflow = await Workflow.findOne({ display_id: req.params.display_id, user_id: user?._id });
+    if (!workflow) return res.status(404).json({ error: 'Workflow not found' });
+
+    if (workflow.status === 'DRAFT') {
+      return res.status(400).json({ error: 'Cannot toggle a draft workflow. Deploy it first.' });
+    }
+
+    if (workflow.is_active) {
+      workflow.is_active = false;
+      workflow.status = 'PAUSED';
+    } else {
+      workflow.is_active = true;
+      workflow.status = 'DEPLOYED';
+    }
+    
+    await workflow.save();
+    res.json(workflow);
+  } catch (error) {
+    console.error('Toggle error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

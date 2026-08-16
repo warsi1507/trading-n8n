@@ -6,7 +6,7 @@ import { connectDB } from '@trading-n8n/db';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8525;
+const PORT = process.env.PORT || 9000;
 const MONGO_URI = process.env.MONGO_URI as string;
 
 import webhookRoutes from './routes/webhooks';
@@ -31,7 +31,7 @@ app.use('/api/workflows', workflowRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
-    message: 'Trading n8n API is running',
+    message: 'Trading n8n (FlowTrade) API is running',
     timestamp: new Date().toISOString()
   });
 });

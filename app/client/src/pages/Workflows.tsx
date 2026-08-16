@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Play, Trash, RefreshCcw } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Play, ArchiveRestore } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";
 import {
@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
-type WorkflowStatus = "DRAFT" | "IN_EDIT" | "DEPLOYED";
+type WorkflowStatus = "DRAFT" | "PAUSED" | "DEPLOYED";
 
 interface Workflow {
   _id: string;
@@ -83,11 +83,17 @@ export default function Workflows() {
 
   const handleToggle = async () => {
     if (toggleWorkflow) {
-      setWorkflows((prev) =>
-        prev.map((w) =>
-          w._id === toggleWorkflow._id ? { ...w, is_active: !w.is_active } : w,
-        ),
-      );
+      try {
+        const token = await getToken();
+        const res = await fetch(`/api/workflows/${toggleWorkflow.display_id}/toggle`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Failed to toggle workflow");
+        fetchWorkflows();
+      } catch (err) {
+        console.error("Failed to toggle workflow", err);
+      }
       setToggleWorkflow(null);
     }
   };
@@ -204,10 +210,6 @@ export default function Workflows() {
                   e.stopPropagation();
                   setToggleWorkflow(w);
                 }}
-                onArchive={(e) => {
-                  e.stopPropagation();
-                  setArchiveWorkflow(w);
-                }}
                 onUnarchive={(e) => {
                   e.stopPropagation();
                   setUnarchiveWorkflow(w);
@@ -250,7 +252,7 @@ export default function Workflows() {
       </Tabs>
 
       {/* Toggle Confirmation Dialog */}
-      <AlertDialog open={!!toggleWorkflow} onOpenChange={(open) => !open && setToggleWorkflow(null)}>
+      <AlertDialog open={!!toggleWorkflow} onOpenChange={(open: boolean) => !open && setToggleWorkflow(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -275,7 +277,7 @@ export default function Workflows() {
       </AlertDialog>
 
       {/* Archive Confirmation Dialog (Requires Name) */}
-      <AlertDialog open={!!archiveWorkflow} onOpenChange={(open) => {
+      <AlertDialog open={!!archiveWorkflow} onOpenChange={(open: boolean) => {
         if (!open) {
           setArchiveWorkflow(null);
           setArchiveConfirmName("");
@@ -311,13 +313,13 @@ export default function Workflows() {
       </AlertDialog>
 
       {/* Unarchive Confirmation Dialog */}
-      <AlertDialog open={!!unarchiveWorkflow} onOpenChange={(open) => !open && setUnarchiveWorkflow(null)}>
+      <AlertDialog open={!!unarchiveWorkflow} onOpenChange={(open: boolean) => !open && setUnarchiveWorkflow(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unarchive Workflow</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to restore "{unarchiveWorkflow?.name}"? 
-              It will be moved back to In Progress (Draft).
+              It will be moved back to In Progress.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -346,14 +348,12 @@ function WorkflowCard({
   isActiveTab,
   onClick,
   onToggle,
-  onArchive,
   onUnarchive,
 }: {
   workflow: Workflow;
   isActiveTab: string;
   onClick: () => void;
   onToggle: (e: React.MouseEvent) => void;
-  onArchive: (e: React.MouseEvent) => void;
   onUnarchive: (e: React.MouseEvent) => void;
 }) {
   return (
@@ -406,7 +406,7 @@ function WorkflowCard({
             </TooltipProvider>
           )}
 
-          {isActiveTab === "ARCHIVED" ? (
+          {isActiveTab === "ARCHIVED" && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -414,24 +414,10 @@ function WorkflowCard({
                     onClick={onUnarchive}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                   >
-                    <RefreshCcw size={16} />
+                    <ArchiveRestore size={16} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Unarchive</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onArchive}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                  >
-                    <Trash size={16} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Delete / Archive</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}

@@ -141,7 +141,7 @@ const workflowSchema = new Schema<IWorkflow>(
     },
     status: {
       type: String,
-      enum: ["DRAFT", "DEPLOYED", "IN_EDIT"],
+      enum: ["DRAFT", "DEPLOYED", "PAUSED"],
       required: true,
       default: "DRAFT",
     },
