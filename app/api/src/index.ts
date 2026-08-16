@@ -17,7 +17,12 @@ app.use(cors());
 // webhook route must be registered BEFORE express.json() because svix needs the raw body
 app.use('/api/webhooks', webhookRoutes);
 
+import { startCronJobs } from './cron/archive';
+
 app.use(express.json());
+
+// Start background cron jobs
+startCronJobs();
 
 // Mount Workflow CRUD routes
 app.use('/api/workflows', workflowRoutes);

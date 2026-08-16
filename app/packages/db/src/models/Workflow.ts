@@ -105,6 +105,8 @@ export interface IWorkflow {
   description: string;
   status: WorkflowStatus;
   is_active: boolean;
+  is_archived: boolean;
+  archived_at: Date | null;
   draft_version: WorkflowVersion;
   deployed_version: WorkflowVersion | null;
   created_at: Date;
@@ -146,6 +148,15 @@ const workflowSchema = new Schema<IWorkflow>(
       required: true,
       default: false,
     },
+    is_archived: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    archived_at: {
+      type: Date,
+      default: null,
+    },
     draft_version: {
       type: workflowVersionSchema,
       required: true,
@@ -157,5 +168,14 @@ const workflowSchema = new Schema<IWorkflow>(
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } },
 );
+
+// Mongoose Pre-Save Hook to enforce invariant:
+// An archived workflow must always be DRAFT and inactive.
+workflowSchema.pre("save", function () {
+  if (this.is_archived) {
+    this.status = "DRAFT";
+    this.is_active = false;
+  }
+});
 
 export const Workflow = model<IWorkflow>("Workflow", workflowSchema);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Play } from "lucide-react";
+import { Plus, Play, Trash, RefreshCcw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
 type WorkflowStatus = "DRAFT" | "IN_EDIT" | "DEPLOYED";
@@ -37,26 +38,37 @@ interface Workflow {
 export default function Workflows() {
   const navigate = useNavigate();
   const { getToken } = useAuth();
+  
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [activeTab, setActiveTab] = useState("IN_PROGRESS");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Dialog States
   const [toggleWorkflow, setToggleWorkflow] = useState<Workflow | null>(null);
+  const [archiveWorkflow, setArchiveWorkflow] = useState<Workflow | null>(null);
+  const [unarchiveWorkflow, setUnarchiveWorkflow] = useState<Workflow | null>(null);
+  const [archiveConfirmName, setArchiveConfirmName] = useState("");
 
   useEffect(() => {
     fetchWorkflows();
-  }, []);
+  }, [activeTab, page]);
 
   const fetchWorkflows = async () => {
     try {
       setIsLoading(true);
       const token = await getToken();
-      const res = await fetch("/api/workflows", {
+      const res = await fetch(`/api/workflows?tab=${activeTab}&page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       if (!res.ok) throw new Error("Failed to fetch workflows");
       const data = await res.json();
-      setWorkflows(data);
+      setWorkflows(data.data);
+      setTotalPages(data.totalPages);
     } catch (err) {
       console.error(err);
     } finally {
@@ -64,10 +76,12 @@ export default function Workflows() {
     }
   };
 
-  const inProgress = workflows.filter((w) => w.status === "DRAFT" || w.status === "IN_EDIT");
-  const deployed = workflows.filter((w) => w.status === "DEPLOYED");
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    setPage(1);
+  };
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
     if (toggleWorkflow) {
       setWorkflows((prev) =>
         prev.map((w) =>
@@ -78,7 +92,39 @@ export default function Workflows() {
     }
   };
 
+  const handleArchive = async () => {
+    if (!archiveWorkflow) return;
+    try {
+      const token = await getToken();
+      await fetch(`/api/workflows/${archiveWorkflow.display_id}/archive`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setArchiveWorkflow(null);
+      setArchiveConfirmName("");
+      fetchWorkflows();
+    } catch (err) {
+      console.error("Failed to archive workflow", err);
+    }
+  };
+
+  const handleUnarchive = async () => {
+    if (!unarchiveWorkflow) return;
+    try {
+      const token = await getToken();
+      await fetch(`/api/workflows/${unarchiveWorkflow.display_id}/unarchive`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUnarchiveWorkflow(null);
+      fetchWorkflows();
+    } catch (err) {
+      console.error("Failed to unarchive workflow", err);
+    }
+  };
+
   const openWorkflow = (display_id: string) => {
+    if (activeTab === "ARCHIVED") return;
     navigate(`/workflows/${display_id}`);
   };
 
@@ -110,98 +156,79 @@ export default function Workflows() {
         <span className="font-medium block">My Workflows</span>
       </h1>
 
-      <Tabs defaultValue="in-progress" className="w-full flex-1 flex flex-col">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full flex-1 flex flex-col">
         <TabsList className="mb-6 flex w-full justify-start h-auto p-0 bg-transparent border-b border-border/40 rounded-none space-x-6">
           <TabsTrigger
-            value="in-progress"
+            value="IN_PROGRESS"
             className="text-base md:text-base px-1 pb-3 pt-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
           >
             In Progress
           </TabsTrigger>
           <TabsTrigger
-            value="deployed"
+            value="DEPLOYED"
             className="text-base md:text-base px-1 pb-3 pt-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
           >
             Deployed
           </TabsTrigger>
+          <TabsTrigger
+            value="ARCHIVED"
+            className="text-base md:text-base px-1 pb-3 pt-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Archived
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="in-progress" className="mt-0 flex flex-col gap-2">
-          {inProgress.length === 0 ? (
+        {activeTab === "ARCHIVED" && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-sm p-3 rounded-lg mb-4 flex items-center shrink-0">
+            <strong>Note:</strong>&nbsp;Archived workflows will be permanently deleted after 30 days.
+          </div>
+        )}
+
+        <div className="mt-0 flex flex-col gap-2 flex-1">
+          {isLoading ? (
             <p className="text-muted-foreground py-12 text-center border rounded-xl border-dashed border-border/50">
-              No workflows in progress.
+              Loading workflows...
+            </p>
+          ) : workflows.length === 0 ? (
+            <p className="text-muted-foreground py-12 text-center border rounded-xl border-dashed border-border/50">
+              No workflows found in this tab.
             </p>
           ) : (
-            inProgress.map((w) => (
+            workflows.map((w) => (
               <WorkflowCard
-                key={w.id}
+                key={w._id}
                 workflow={w}
-                onClick={() => openWorkflow(w.id)}
-              />
-            ))
-          )}
-
-          {/* Pagination */}
-          {inProgress.length > 0 && (
-            <div className="flex items-center justify-between py-4 border-t border-gray-200 dark:border-white/10 mt-4 px-0">
-              <div className="text-sm text-muted-foreground">
-                Showing 1-{inProgress.length} of {inProgress.length}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                  className="h-8 w-8 p-0 border-gray-200 dark:border-white/10 bg-transparent"
-                >
-                  <span className="sr-only">Previous page</span>
-                  {"<"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                  className="h-8 w-8 p-0 border-gray-200 dark:border-white/10 bg-transparent"
-                >
-                  <span className="sr-only">Next page</span>
-                  {">"}
-                </Button>
-              </div>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="deployed" className="mt-0 flex flex-col gap-2">
-          {deployed.length === 0 ? (
-            <p className="text-muted-foreground py-12 text-center border rounded-xl border-dashed border-border/50">
-              No deployed workflows.
-            </p>
-          ) : (
-            deployed.map((w) => (
-              <WorkflowCard
-                key={w.id}
-                workflow={w}
-                onClick={() => openWorkflow(w.id)}
+                isActiveTab={activeTab}
+                onClick={() => openWorkflow(w.display_id)}
                 onToggle={(e) => {
                   e.stopPropagation();
                   setToggleWorkflow(w);
+                }}
+                onArchive={(e) => {
+                  e.stopPropagation();
+                  setArchiveWorkflow(w);
+                }}
+                onUnarchive={(e) => {
+                  e.stopPropagation();
+                  setUnarchiveWorkflow(w);
                 }}
               />
             ))
           )}
 
-          {/* Pagination */}
-          {deployed.length > 0 && (
-            <div className="flex items-center justify-between py-4 border-t border-gray-200 dark:border-white/10 mt-4 px-0">
+          {/* Pagination Controls */}
+          {!isLoading && totalPages > 1 && (
+            <div className="flex items-center justify-between py-4 border-t border-border/40 mt-4 px-0 shrink-0">
               <div className="text-sm text-muted-foreground">
-                Showing 1-{deployed.length} of {deployed.length}
+                Page {page} of {totalPages}
               </div>
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled
-                  className="h-8 w-8 p-0 border-gray-200 dark:border-white/10 bg-transparent"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="h-8 w-8 p-0 border-border/40 bg-transparent hover:bg-accent"
                 >
                   <span className="sr-only">Previous page</span>
                   {"<"}
@@ -209,8 +236,9 @@ export default function Workflows() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled
-                  className="h-8 w-8 p-0 border-gray-200 dark:border-white/10 bg-transparent"
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className="h-8 w-8 p-0 border-border/40 bg-transparent hover:bg-accent"
                 >
                   <span className="sr-only">Next page</span>
                   {">"}
@@ -218,23 +246,18 @@ export default function Workflows() {
               </div>
             </div>
           )}
-        </TabsContent>
+        </div>
       </Tabs>
 
       {/* Toggle Confirmation Dialog */}
-      <AlertDialog
-        open={!!toggleWorkflow}
-        onOpenChange={(open: boolean) => !open && setToggleWorkflow(null)}
-      >
+      <AlertDialog open={!!toggleWorkflow} onOpenChange={(open) => !open && setToggleWorkflow(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {toggleWorkflow?.active
-                ? "Deactivate Workflow?"
-                : "Activate Workflow?"}
+              {toggleWorkflow?.is_active ? "Deactivate Workflow?" : "Activate Workflow?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {toggleWorkflow?.active
+              {toggleWorkflow?.is_active
                 ? `Are you sure you want to deactivate "${toggleWorkflow?.name}"? It will stop executing trades.`
                 : `Are you sure you want to activate "${toggleWorkflow?.name}"? It will begin executing trades based on its logic.`}
             </AlertDialogDescription>
@@ -243,27 +266,75 @@ export default function Workflows() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggle}
-              className={
-                toggleWorkflow?.active
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : ""
-              }
+              className={toggleWorkflow?.is_active ? "bg-red-500 hover:bg-red-600 text-white" : ""}
             >
-              {toggleWorkflow?.active ? "Deactivate" : "Activate"}
+              {toggleWorkflow?.is_active ? "Deactivate" : "Activate"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Updated Action Button */}
+      {/* Archive Confirmation Dialog (Requires Name) */}
+      <AlertDialog open={!!archiveWorkflow} onOpenChange={(open) => {
+        if (!open) {
+          setArchiveWorkflow(null);
+          setArchiveConfirmName("");
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive Workflow</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive <strong>"{archiveWorkflow?.name}"</strong> and immediately set its status to DRAFT.
+              It will be permanently deleted in 30 days.
+              <br/><br/>
+              Please type <strong>{archiveWorkflow?.name}</strong> to confirm.
+            </AlertDialogDescription>
+            <Input 
+              value={archiveConfirmName} 
+              onChange={(e) => setArchiveConfirmName(e.target.value)} 
+              placeholder="Type workflow name here..." 
+              className="mt-4"
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={archiveConfirmName !== archiveWorkflow?.name}
+              onClick={handleArchive}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Archive
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unarchive Confirmation Dialog */}
+      <AlertDialog open={!!unarchiveWorkflow} onOpenChange={(open) => !open && setUnarchiveWorkflow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unarchive Workflow</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to restore "{unarchiveWorkflow?.name}"? 
+              It will be moved back to In Progress (Draft).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleUnarchive}>
+              Unarchive
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Floating Action Button */}
       <button
         onClick={createWorkflow}
         className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-12 px-6 bg-sky-400 hover:bg-sky-300 text-sky-950 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 group border border-sky-400/20"
       >
-        <Plus
-          size={20}
-          className="group-hover:rotate-90 transition-transform duration-300"
-        />
+        <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
         <span>Workflow</span>
       </button>
     </div>
@@ -272,17 +343,23 @@ export default function Workflows() {
 
 function WorkflowCard({
   workflow,
+  isActiveTab,
   onClick,
   onToggle,
+  onArchive,
+  onUnarchive,
 }: {
   workflow: Workflow;
+  isActiveTab: string;
   onClick: () => void;
-  onToggle?: (e: React.MouseEvent) => void;
+  onToggle: (e: React.MouseEvent) => void;
+  onArchive: (e: React.MouseEvent) => void;
+  onUnarchive: (e: React.MouseEvent) => void;
 }) {
   return (
     <Card
       onClick={onClick}
-      className="bg-black/[0.02] dark:bg-white/[0.02] border-gray-200 dark:border-white/10 shadow-none hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors cursor-pointer group rounded-xl"
+      className={`bg-black/[0.02] dark:bg-white/[0.02] border-gray-200 dark:border-white/10 shadow-none hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors group rounded-xl ${isActiveTab !== "ARCHIVED" ? "cursor-pointer" : ""}`}
     >
       <CardContent className="p-0 flex items-center gap-4 py-4 px-5 min-h-[72px]">
         {/* ID Badge */}
@@ -295,40 +372,68 @@ function WorkflowCard({
           {workflow.name}
         </div>
 
-        {/* Description - hidden on small screens */}
+        {/* Description */}
         <div className="hidden md:flex flex-1 min-w-0 items-center">
           <TooltipProvider>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <div className="text-sm text-muted-foreground truncate cursor-help w-full text-left">
+                <div className={`text-sm text-muted-foreground truncate w-full text-left ${isActiveTab !== "ARCHIVED" ? "cursor-help" : ""}`}>
                   {workflow.description || "No description provided."}
                 </div>
               </TooltipTrigger>
-              <TooltipContent
-                className="max-w-[300px] p-3 text-sm"
-                sideOffset={8}
-              >
+              <TooltipContent className="max-w-[300px] p-3 text-sm" sideOffset={8}>
                 <p>{workflow.description || "No description provided."}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
 
-        {/* Action Button Container */}
-        <div className="ml-auto shrink-0 flex items-center justify-end min-w-[40px]">
-          {workflow.status === "DEPLOYED" && (
-            <div className="pl-3 border-l border-gray-200 dark:border-white/10 flex items-center">
-              <button
-                onClick={onToggle}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${workflow.is_active ? "text-green-500 hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "text-muted-foreground hover:bg-accent/30"}`}
-              >
-                <Play
-                  size={16}
-                  fill="currentColor"
-                  className={workflow.is_active ? "opacity-100" : "opacity-40"}
-                />
-              </button>
-            </div>
+        {/* Action Buttons */}
+        <div className="ml-auto shrink-0 flex items-center justify-end gap-1">
+          {isActiveTab === "DEPLOYED" && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onToggle}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${workflow.is_active ? "text-green-500 hover:bg-green-500/10 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "text-muted-foreground hover:bg-accent/30"}`}
+                  >
+                    <Play size={16} fill="currentColor" className={workflow.is_active ? "opacity-100" : "opacity-40"} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{workflow.is_active ? "Deactivate" : "Activate"}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {isActiveTab === "ARCHIVED" ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onUnarchive}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                  >
+                    <RefreshCcw size={16} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Unarchive</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onArchive}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Delete / Archive</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </CardContent>
