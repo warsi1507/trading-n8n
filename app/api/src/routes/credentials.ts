@@ -1,9 +1,12 @@
 import { Router, Request, Response } from "express";
 import { Credential, User } from "@trading-n8n/db";
 import { encrypt, decrypt } from "../utils/encryption";
-import { getAuth } from "@clerk/express";
+import { clerkMiddleware, getAuth } from "@clerk/express";
 
 const router = Router();
+
+// Apply Clerk middleware to parse session tokens
+router.use(clerkMiddleware());
 
 // Middleware to get current user from MongoDB based on Clerk ID
 const attachUser = async (req: Request, res: Response, next: any) => {
