@@ -4,16 +4,6 @@ import { Eye, EyeOff, Copy, Check, Trash2, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import type { CredentialResponse } from "@trading-n8n/common";
 
 export function Vault() {
@@ -94,7 +84,6 @@ export function Vault() {
       });
       if (res.ok) {
         setCredentials(credentials.filter(c => c._id !== credToDelete._id));
-        setDeleteConfirmOpen(false);
         setCredToDelete(null);
         setDeleteConfirmName("");
       }
@@ -177,90 +166,96 @@ export function Vault() {
           credentials.map((cred) => {
             const isVisible = visibleTokens[cred._id];
             const isCopied = copiedTokens[cred._id];
+            const isBeingDeleted = credToDelete?._id === cred._id;
 
             return (
-              <div key={cred._id} className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:border-primary/20 transition-colors shadow-sm group">
-                <div className="flex flex-col gap-1 overflow-hidden">
-                  <span className="font-medium text-sm truncate">{cred.name}</span>
-                  <div className="font-mono text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md max-w-[200px] sm:max-w-[300px] truncate transition-all">
-                    {isVisible ? cred.value : "••••••••••••••••••••••••••••"}
+              <div key={cred._id} className="flex flex-col p-4 rounded-xl border border-border/50 bg-card hover:border-primary/20 transition-colors shadow-sm group">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1 overflow-hidden">
+                    <span className="font-medium text-sm truncate">{cred.name}</span>
+                    <div className="font-mono text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md max-w-[200px] sm:max-w-[300px] truncate transition-all">
+                      {isVisible ? cred.value : "••••••••••••••••••••••••••••"}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 relative"
+                      onClick={() => handleCopy(cred._id, cred.value)}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center transition-all duration-200">
+                        {isCopied ? <Check className="w-4 h-4 text-green-500 scale-100" /> : <Copy className="w-4 h-4 scale-100" />}
+                      </div>
+                      {isCopied && (
+                        <span className="absolute -top-6 text-[10px] bg-foreground text-background px-1.5 py-0.5 rounded shadow-lg animate-in zoom-in-95 fade-in duration-200">
+                          Copied
+                        </span>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => toggleVisibility(cred._id)}
+                    >
+                      {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </Button>
+
+                    <div className="w-px h-4 bg-border mx-1" />
+
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      onClick={() => {
+                        setCredToDelete(cred);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 relative"
-                    onClick={() => handleCopy(cred._id, cred.value)}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center transition-all duration-200">
-                      {isCopied ? <Check className="w-4 h-4 text-green-500 scale-100" /> : <Copy className="w-4 h-4 scale-100" />}
+
+                {isBeingDeleted && (
+                  <div className="mt-4 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Type <strong className="text-foreground">{cred.name}</strong> to delete this credential.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        value={deleteConfirmName} 
+                        onChange={(e) => setDeleteConfirmName(e.target.value)} 
+                        placeholder="Credential name..." 
+                        className="h-8 text-sm flex-1"
+                      />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8"
+                        onClick={() => { setCredToDelete(null); setDeleteConfirmName(""); }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="h-8"
+                        disabled={deleteConfirmName !== cred.name || isDeleting}
+                        onClick={handleDelete}
+                      >
+                        {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : "Delete"}
+                      </Button>
                     </div>
-                    {isCopied && (
-                      <span className="absolute -top-6 text-[10px] bg-foreground text-background px-1.5 py-0.5 rounded shadow-lg animate-in zoom-in-95 fade-in duration-200">
-                        Copied
-                      </span>
-                    )}
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={() => toggleVisibility(cred._id)}
-                  >
-                    {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-
-                  <div className="w-px h-4 bg-border mx-1" />
-
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                    onClick={() => {
-                      setCredToDelete(cred);
-                      setDeleteConfirmOpen(true);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                  </div>
+                )}
               </div>
             );
           })
         )}
       </div>
-
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Credential</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the credential <strong>"{credToDelete?.name}"</strong>. 
-              Any deployed workflows relying on this token will immediately fail.
-              <br/><br/>
-              Please type "<strong>{credToDelete?.name}</strong>" to confirm.
-            </AlertDialogDescription>
-            <Input 
-              value={deleteConfirmName} 
-              onChange={(e) => setDeleteConfirmName(e.target.value)} 
-              placeholder="Type credential name here..." 
-            />
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => { setCredToDelete(null); setDeleteConfirmName(""); }}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
-              disabled={deleteConfirmName !== credToDelete?.name || isDeleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

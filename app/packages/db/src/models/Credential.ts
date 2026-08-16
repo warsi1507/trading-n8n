@@ -23,18 +23,22 @@ const credentialSchema = new Schema<ICredential>({
   encrypted_value: {
     type: String,
     required: true,
+    immutable: true,
   },
   iv: {
     type: String,
     required: true,
+    immutable: true,
   },
   auth_tag: {
     type: String,
     required: true,
+    immutable: true,
   },
   created_at: {
     type: Date,
     default: Date.now,
+    immutable: true,
   },
 });
 
