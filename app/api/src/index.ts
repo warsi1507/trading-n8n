@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 8525;
 const MONGO_URI = process.env.MONGO_URI as string;
 
 import webhookRoutes from './routes/webhooks';
+import workflowRoutes from './routes/workflows';
 
 app.use(cors());
 
@@ -17,6 +18,9 @@ app.use(cors());
 app.use('/api/webhooks', webhookRoutes);
 
 app.use(express.json());
+
+// Mount Workflow CRUD routes
+app.use('/api/workflows', workflowRoutes);
 
 // Health Check Route
 app.get('/health', (req, res) => {
