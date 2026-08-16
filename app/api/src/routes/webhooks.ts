@@ -1,7 +1,7 @@
 import { Router } from "express";
 import express from "express";
 import { Webhook } from "svix";
-import { User } from "@trading-n8n/db";
+import { User, Workflow, Counter } from "@trading-n8n/db";
 
 const router = Router();
 
@@ -91,8 +91,12 @@ router.post( "/clerk", express.raw({ type: "application/json" }), async (req, re
 
     if (eventType === "user.deleted") {
       try {
-        await User.findOneAndDelete({ clerk_id: id });
-        console.log(`Successfully deleted user ${id} from MongoDB`);
+        const deletedUser = await User.findOneAndDelete({ clerk_id: id });
+        if (deletedUser) {
+          await Workflow.deleteMany({ user_id: deletedUser._id });
+          await Counter.findOneAndDelete({ _id: `workflowId-${deletedUser._id}` });
+        }
+        console.log(`Successfully deleted user ${id} and all associated data from MongoDB`);
       } catch (error) {
         console.error("Failed to delete user from MongoDB:", error);
         return res.status(500).json({ error: "Database error" });
