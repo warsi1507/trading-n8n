@@ -1,6 +1,6 @@
-import { ClerkProvider } from '@clerk/react';
-import { dark } from '@clerk/themes';
-import { useTheme } from './ThemeProvider';
+import { ClerkProvider } from "@clerk/react";
+import { dark } from "@clerk/themes";
+import { useTheme } from "./ThemeProvider";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -9,17 +9,20 @@ if (!PUBLISHABLE_KEY) {
 }
 
 export function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
-    const { theme } = useTheme();
-    const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const { theme } = useTheme();
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-    return (
-        <ClerkProvider 
-            publishableKey={PUBLISHABLE_KEY} 
-            appearance={{ theme: isDark ? dark : undefined }}
-            afterSignOutUrl="/"
-            localization={{ userButton: { action__manageAccount: 'Settings' } }}
-        >
-            {children}
-        </ClerkProvider>
-    );
+  return (
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
+      appearance={{ theme: isDark ? dark : undefined }}
+      afterSignOutUrl="/"
+      localization={{ userButton: { action__manageAccount: "Settings" } }}
+    >
+      {children}
+    </ClerkProvider>
+  );
 }

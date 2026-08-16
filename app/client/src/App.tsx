@@ -1,19 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import '@xyflow/react/dist/style.css';
-import { ReactFlowProvider } from '@xyflow/react';
-import { Show, RedirectToSignIn } from '@clerk/react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "@xyflow/react/dist/style.css";
+import { ReactFlowProvider } from "@xyflow/react";
+import { Show, RedirectToSignIn } from "@clerk/react";
 
 // Providers and Layout
-import { ThemeProvider } from './components/ThemeProvider';
-import { ClerkThemeWrapper } from './components/ClerkThemeWrapper';
-import Header from './components/Header';
+import { ThemeProvider } from "./components/ThemeProvider";
+import { ClerkThemeWrapper } from "./components/ClerkThemeWrapper";
+import Header from "./components/Header";
 
 // Pages
-import Home from './pages/Home';
-import About from './pages/About';
-import NotFound from './pages/NotFound';
-import CreateWorkflow from './components/CreateWorkflow';
-import Workflows from './pages/Workflows';
+import Home from "./pages/Home";
+import About from "./pages/About";
+import NotFound from "./pages/NotFound";
+import CreateWorkflow from "./components/CreateWorkflow";
+import Workflows from "./pages/Workflows";
 
 // Protected Route Wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,21 +39,27 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
-                
+
                 {/* Protected Routes */}
-                <Route path="/workflows" element={
-                  <ProtectedRoute>
-                    <Workflows />
-                  </ProtectedRoute>
-                } />
-                <Route path="/create-workflow" element={
-                  <ProtectedRoute>
-                    <ReactFlowProvider>
-                      <CreateWorkflow />
-                    </ReactFlowProvider>
-                  </ProtectedRoute>
-                } />
-                
+                <Route
+                  path="/workflows"
+                  element={
+                    <ProtectedRoute>
+                      <Workflows />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/create-workflow"
+                  element={
+                    <ProtectedRoute>
+                      <ReactFlowProvider>
+                        <CreateWorkflow />
+                      </ReactFlowProvider>
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

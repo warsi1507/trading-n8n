@@ -45,7 +45,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Nunito', 'sans-serif'],
+        sans: ["Nunito", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -64,4 +64,4 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};

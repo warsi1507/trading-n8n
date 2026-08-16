@@ -1,6 +1,11 @@
-import type { PriceTriggerMetadata, TimeTriggerMetadata, TradingMetadata } from './metadata';
+import type {
+  PriceTriggerMetadata,
+  TimeTriggerMetadata,
+  TradingMetadata,
+} from "./metadata";
 
-export type NodeMetadata = PriceTriggerMetadata | TimeTriggerMetadata | TradingMetadata;
+export type NodeMetadata =
+  PriceTriggerMetadata | TimeTriggerMetadata | TradingMetadata;
 
 export type NodeData = {
   name: string;

@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 /**
  * Counter sequence generator used for creating human-readable display IDs.
@@ -10,14 +10,14 @@ export interface ICounter {
 }
 
 const counterSchema = new Schema<ICounter>({
-  _id: { 
-    type: String, 
-    required: true 
+  _id: {
+    type: String,
+    required: true,
   },
-  sequence_value: { 
-    type: Number, 
-    required: true 
-  }
+  sequence_value: {
+    type: Number,
+    required: true,
+  },
 });
 
-export const Counter = model<ICounter>('Counter', counterSchema);
+export const Counter = model<ICounter>("Counter", counterSchema);

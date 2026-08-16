@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 /**
  * Core User entity for authentication and workflow ownership.
@@ -10,19 +10,19 @@ export interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  email: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  name: { 
-    type: String, 
-    required: true 
+  name: {
+    type: String,
+    required: true,
   },
-  created_at: { 
-    type: Date, 
-    default: Date.now 
-  }
+  created_at: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-export const User = model<IUser>('User', userSchema);
+export const User = model<IUser>("User", userSchema);
