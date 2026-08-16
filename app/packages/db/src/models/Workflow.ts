@@ -37,7 +37,7 @@ const nodeSchema = new Schema<AppNode>(
       },
       description: {
         type: String,
-        required: true,
+        default: "",
       },
       kind: {
         type: String,
