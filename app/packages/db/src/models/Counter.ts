@@ -13,6 +13,7 @@ const counterSchema = new Schema<ICounter>({
   _id: {
     type: String,
     required: true,
+    immutable: true,
   },
   sequence_value: {
     type: Number,

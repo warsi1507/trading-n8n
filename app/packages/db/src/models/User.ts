@@ -16,6 +16,7 @@ const userSchema = new Schema<IUser>({
     required: true,
     unique: true,
     index: true,
+    immutable: true,
   },
   email: {
     type: String,
@@ -29,6 +30,7 @@ const userSchema = new Schema<IUser>({
   created_at: {
     type: Date,
     default: Date.now,
+    immutable: true,
   },
 });
 

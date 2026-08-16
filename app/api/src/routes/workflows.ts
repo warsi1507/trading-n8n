@@ -80,7 +80,7 @@ router.post('/', async (req: Request, res: Response): Promise<any> => {
 
     // Use atomic counter pattern for sequential display IDs (workflow-1, workflow-2)
     const counter = await Counter.findOneAndUpdate(
-      { _id: 'workflowId' },
+      { _id: `workflowId-${user._id}` },
       { $inc: { sequence_value: 1 } },
       { upsert: true, returnDocument: 'after' }
     );
