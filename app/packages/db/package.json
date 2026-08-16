@@ -1,0 +1,18 @@
+{
+  "name": "@trading-n8n/db",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@trading-n8n/common": "*",
+    "@types/mongoose": "^5.11.96",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.9.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
