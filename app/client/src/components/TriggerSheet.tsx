@@ -1,4 +1,4 @@
-import type { NodeMetadata, AppNode } from "./CreateWorkflow";
+import type { AppNode, NodeMetadata } from '@trading-n8n/common';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

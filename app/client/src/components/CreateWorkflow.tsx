@@ -11,18 +11,7 @@ import { TimeTrigger } from '@/nodes/triggers/TimeTrigger';
 import { Backpack } from '@/nodes/actions/Backpack';
 import { Hyperliquid } from '@/nodes/actions/Hyperliquid';
 import { Lighter } from '@/nodes/actions/Lighter';
-import type { PriceTriggerMetadata, TimeTriggerMetadata, TradingMetadata } from '@trading-n8n/common';
-
-export type NodeMetadata = PriceTriggerMetadata | TimeTriggerMetadata | TradingMetadata;
-
-type NodeData = {
-  name: string;
-  description: string;
-  kind: "action" | "trigger";
-  metadata: NodeMetadata;
-};
-
-export type AppNode = Node<NodeData>;
+import type { AppNode } from '@trading-n8n/common';
 
 const nodeTypes = {
   "price-trigger": PriceTrigger,

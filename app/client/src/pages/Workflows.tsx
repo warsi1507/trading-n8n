@@ -49,16 +49,16 @@ export default function Workflows() {
   return (
     <div className="container pb-32 pt-24 max-w-full mx-auto px-4 md:px-8 min-h-screen relative flex flex-col">
       <h1 
-        className="text-3xl md:text-4xl font-extrabold tracking-tight mb-6 text-foreground"
+        className="text-lg md:text-xl lg:text-[2rem] leading-[1.1] tracking-tight mb-10"
         style={{ fontFamily: "'Nunito', sans-serif" }}
       >
-        My Workflows
+        <span className="font-medium text-foreground/80 block mb-2">My Workflows</span>
       </h1>
       
       <Tabs defaultValue="in-progress" className="w-full flex-1 flex flex-col">
-        <TabsList className="mb-2 grid w-full grid-cols-2">
-          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-          <TabsTrigger value="deployed">Deployed</TabsTrigger>
+        <TabsList className="mb-4 grid w-full grid-cols-2 h-10">
+          <TabsTrigger value="in-progress" className="text-base md:text-base">In Progress</TabsTrigger>
+          <TabsTrigger value="deployed" className="text-base md:text-base">Deployed</TabsTrigger>
         </TabsList>
         
         <TabsContent value="in-progress" className="mt-0 flex flex-col gap-1">
