@@ -29,7 +29,7 @@ const nodeSchema = new Schema({
         },
         description: {
             type: String,
-            required: true,
+            default: "",
         },
         kind: {
             type: String,

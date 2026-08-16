@@ -11,6 +11,7 @@ const MONGO_URI = process.env.MONGO_URI as string;
 
 import webhookRoutes from './routes/webhooks';
 import workflowRoutes from './routes/workflows';
+import credentialsRoutes from './routes/credentials';
 
 app.use(cors());
 
@@ -24,8 +25,9 @@ app.use(express.json());
 // Start background cron jobs
 startCronJobs();
 
-// Mount Workflow CRUD routes
+// Mount API routes
 app.use('/api/workflows', workflowRoutes);
+app.use('/api/credentials', credentialsRoutes);
 
 // Health Check Route
 app.get('/health', (req, res) => {

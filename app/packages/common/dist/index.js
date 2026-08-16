@@ -4,3 +4,4 @@ export * from "./nodes";
 export * from "./edges";
 export * from "./workflows";
 export * from "./schemas";
+export * from "./credentials";

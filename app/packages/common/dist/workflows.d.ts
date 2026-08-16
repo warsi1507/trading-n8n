@@ -1,4 +1,4 @@
-export type WorkflowStatus = "DRAFT" | "DEPLOYED" | "IN_EDIT";
+export type WorkflowStatus = "DRAFT" | "DEPLOYED" | "PAUSED";
 export interface WorkflowVersion {
     is_valid?: boolean;
     nodes: any[];

@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun, Settings as SettingsIcon } from "lucide-react";
+import { Moon, Sun, Key as SettingsIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 import { dark } from "@clerk/themes";
+import { Vault } from "./Vault";
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
@@ -84,12 +85,7 @@ export default function Header() {
                 url="credentials"
                 labelIcon={<SettingsIcon size={16} />}
               >
-                <div>
-                  <h1 className="text-xl font-bold mb-4">Credentials</h1>
-                  <p className="text-muted-foreground">
-                    Credentials section is completely empty for now.
-                  </p>
-                </div>
+                <Vault />
               </UserButton.UserProfilePage>
             </UserButton>
           </Show>

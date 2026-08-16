@@ -10,14 +10,14 @@ export const NodePositionSchema = z.object({
  * Core data payload schema for a workflow node.
  */
 export const NodeDataSchema = z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string().max(50),
+    description: z.string().max(200),
     kind: z.enum(["action", "trigger"]),
     metadata: z.record(z.string(), z.any()),
 });
 /**
  * Validation schema for a complete ReactFlow Node.
- * Uses .passthrough() to safely allow internal ReactFlow DOM properties
+ * Uses .loose() to safely allow internal ReactFlow DOM properties
  * (like dragging states) to pass through without being stripped.
  */
 export const AppNodeSchema = z.object({
@@ -30,7 +30,7 @@ export const AppNodeSchema = z.object({
     dragging: z.boolean().optional(),
     width: z.number().optional(),
     height: z.number().optional(),
-}).passthrough();
+}).loose();
 /**
  * Validation schema for a ReactFlow Edge connecting two nodes.
  */
@@ -40,7 +40,7 @@ export const AppEdgeSchema = z.object({
     target: z.string(),
     sourceHandle: z.string().nullable().optional(),
     targetHandle: z.string().nullable().optional(),
-}).passthrough();
+}).loose();
 /**
  * Sub-schema validating a complete workflow graph state.
  */
@@ -53,8 +53,8 @@ export const WorkflowVersionSchema = z.object({
  * Payload validation for creating a new workflow.
  */
 export const CreateWorkflowSchema = z.object({
-    name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-    description: z.string().max(500).optional().default(""),
+    name: z.string().min(1, "Name is required").max(50, "Name is too long"),
+    description: z.string().max(200).optional().default(""),
 });
 /**
  * Payload validation for saving a draft graph.

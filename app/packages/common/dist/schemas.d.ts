@@ -20,7 +20,7 @@ export declare const NodeDataSchema: z.ZodObject<{
 }, z.core.$strip>;
 /**
  * Validation schema for a complete ReactFlow Node.
- * Uses .passthrough() to safely allow internal ReactFlow DOM properties
+ * Uses .loose() to safely allow internal ReactFlow DOM properties
  * (like dragging states) to pass through without being stripped.
  */
 export declare const AppNodeSchema: z.ZodObject<{
