@@ -123,11 +123,13 @@ const workflowSchema = new Schema<IWorkflow>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      immutable: true,
     },
     display_id: {
       type: String,
       required: true,
       unique: true,
+      immutable: true,
     },
     name: {
       type: String,
