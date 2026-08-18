@@ -124,7 +124,7 @@ export function TriggerSheet({
             <img
               src="/icon-trigger.svg"
               alt="Trigger Icon"
-              className="w-12 h-12"
+              className="w-10 h-10"
             />
             <div className="flex flex-col">
               <SheetTitle className="text-2xl font-bold tracking-tight text-foreground">
@@ -142,7 +142,7 @@ export function TriggerSheet({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className="absolute right-10 top-10 text-red-500 hover:text-red-600 hover:bg-red-500/10 w-10 h-10 rounded-xl transition-colors"
+              className="absolute right-10 top-10 text-red-500 hover:text-red-600 hover:bg-red-500/10 w-10 h-10 rounded-lg transition-colors"
             >
               <Trash2 className="w-5 h-5" />
             </Button>
@@ -152,14 +152,14 @@ export function TriggerSheet({
           <div className="space-y-4 mb-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">
-                Name
+                Name <span className="text-red-500 ml-1">*</span>
               </Label>
               <Input
                 value={nodeName}
                 onChange={(e) => setNodeName(e.target.value)}
                 maxLength={50}
                 placeholder="e.g. My Trigger"
-                className="h-12 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
+                className="h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
               />
             </div>
             <div className="space-y-2">
@@ -171,7 +171,7 @@ export function TriggerSheet({
                 onChange={(e) => setNodeDescription(e.target.value)}
                 maxLength={200}
                 placeholder="Add a description..."
-                className="w-full flex min-h-[80px] rounded-xl border border-muted-foreground/20 bg-muted/30 px-3 py-2 text-sm hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                className="w-full flex min-h-[80px] rounded-lg border border-muted-foreground/20 bg-muted/30 px-3 py-2 text-sm hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 resize-none"
               />
             </div>
           </div>
@@ -180,7 +180,7 @@ export function TriggerSheet({
             value={selectedTrigger}
             onValueChange={(val) => setSelectedTrigger(val as NodeType)}
           >
-            <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium [&_[data-description]]:hidden">
+            <SelectTrigger className="w-full h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium [&_[data-description]]:hidden">
               <SelectValue placeholder="Select a Trigger" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
@@ -190,7 +190,7 @@ export function TriggerSheet({
                     <SelectItem
                       key={id}
                       value={id}
-                      className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                      className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                     >
                       <div className="flex flex-col items-start gap-1.5">
                         <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
@@ -214,14 +214,14 @@ export function TriggerSheet({
             <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Time Interval (seconds)
+                  Time Interval (seconds) <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   type="text"
                   inputMode="numeric"
                   value={timeStr}
                   onChange={(e) => setTimeStr(e.target.value)}
-                  className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isTimeInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
+                  className={`h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isTimeInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
                   placeholder="e.g. 3600"
                 />
                 {isTimeInvalid && (
@@ -237,15 +237,15 @@ export function TriggerSheet({
             <div className="mt-6 space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Asset
-                </Label>
+                Asset <span className="text-red-500 ml-1">*</span>
+              </Label>
                 <Select
                   value={metadata.asset}
                   onValueChange={(value) =>
                     setMetadata({ ...metadata, asset: value })
                   }
                 >
-                  <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
+                  <SelectTrigger className="w-full h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium">
                     <SelectValue placeholder="Select an asset" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
@@ -254,7 +254,7 @@ export function TriggerSheet({
                         <SelectItem
                           key={id}
                           value={id}
-                          className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                          className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                         >
                           <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
                             {id}
@@ -268,14 +268,14 @@ export function TriggerSheet({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Target Price (USD )
+                  Target Price (USD ) <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   type="text"
                   inputMode="decimal"
                   value={priceStr}
                   onChange={(e) => setPriceStr(e.target.value)}
-                  className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isPriceInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
+                  className={`h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isPriceInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
                   placeholder="e.g. 60000.50"
                 />
                 {isPriceInvalid && (
@@ -305,14 +305,14 @@ export function TriggerSheet({
             }}
             disabled={isTriggerInvalid}
             type="submit"
-            className="w-full h-12 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-200 order-2"
+            className="w-full h-10 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 order-2"
           >
             {initialNode ? "Save Changes" : "Create"}
           </Button>
           <SheetClose asChild>
             <Button
               variant="outline"
-              className="w-full h-12 rounded-xl font-medium border-muted-foreground/30 hover:bg-muted/50 transition-all order-1"
+              className="w-full h-10 rounded-lg font-medium border-muted-foreground/30 hover:bg-muted/50 transition-all order-1"
             >
               Cancel
             </Button>

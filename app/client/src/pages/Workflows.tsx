@@ -260,8 +260,8 @@ export default function Workflows() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {toggleWorkflow?.is_active
-                ? `Are you sure you want to deactivate "${toggleWorkflow?.name}"? It will stop executing trades.`
-                : `Are you sure you want to activate "${toggleWorkflow?.name}"? It will begin executing trades based on its logic.`}
+                ? `Are you sure you want to deactivate "${toggleWorkflow?.name}" ? It will stop executing trades.`
+                : `Are you sure you want to activate "${toggleWorkflow?.name}" ? It will begin executing trades based on its logic.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

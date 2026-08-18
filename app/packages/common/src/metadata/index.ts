@@ -12,4 +12,6 @@ export type TradingMetadata = {
   type: "LONG" | "SHORT";
   qty: number;
   symbol: string;
+  platform?: "Backpack" | "Hyperliquid" | "Lighter.xyz";
+  credentials?: Record<string, string>;
 };

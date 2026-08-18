@@ -13,16 +13,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
-import { SUPPORTED_ASSETS } from "@trading-n8n/common";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/react";
+import { SUPPORTED_ASSETS, type CredentialResponse } from "@trading-n8n/common";
 import type {
   TradingMetadata,
   ActionType,
@@ -63,6 +57,22 @@ export const SUPPORTED_ACTIONS: {
   },
 ];
 
+export const PLATFORM_CONFIG: Record<string, { label: string }[]> = {
+  backpack: [
+    { label: "API Key" },
+    { label: "API Secret" },
+  ],
+  hyperliquid: [
+    { label: "Master Address" },
+    { label: "Agent Private Key" },
+  ],
+  lighter: [
+    { label: "Account Index" },
+    { label: "API Key Index" },
+    { label: "API Private Key" },
+  ],
+};
+
 export function ActionSheet({
   onSelect,
   onClose,
@@ -82,6 +92,28 @@ export function ActionSheet({
     initialNode ? initialNode.data.description : "",
   );
 
+  const { getToken } = useAuth();
+  const [vaultCredentials, setVaultCredentials] = useState<CredentialResponse[]>([]);
+
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetch("/api/credentials", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setVaultCredentials(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch credentials", err);
+      }
+    };
+    fetchCredentials();
+  }, [getToken]);
+
   const [qtyStr, setQtyStr] = useState(
     initialNode && (initialNode.data.metadata as TradingMetadata).qty
       ? (initialNode.data.metadata as TradingMetadata).qty.toString()
@@ -92,13 +124,21 @@ export function ActionSheet({
   const isNameEmpty = nodeName.trim() === "";
   const isQtyInvalid = qtyStr !== "" && !/^\d+(\.\d+)?$/.test(qtyStr);
   const isQtyEmpty = qtyStr === "";
+
+  // Check if all required platform credentials are set
+  const platformRequirements = selectedAction ? PLATFORM_CONFIG[selectedAction] : undefined;
+  const hasMissingCredentials = platformRequirements
+    ? platformRequirements.some(req => !metadata.credentials?.[req.label])
+    : false;
+
   const isActionInvalid =
     isNameEmpty ||
     !selectedAction ||
     !metadata.symbol ||
     !metadata.type ||
     isQtyEmpty ||
-    isQtyInvalid;
+    isQtyInvalid ||
+    hasMissingCredentials;
 
   return (
     <Sheet
@@ -113,7 +153,7 @@ export function ActionSheet({
             <img
               src="/icon-action.svg"
               alt="Action Icon"
-              className="w-12 h-12"
+              className="w-10 h-10"
             />
             <div className="flex flex-col">
               <SheetTitle className="text-2xl font-bold tracking-tight text-foreground">
@@ -131,7 +171,7 @@ export function ActionSheet({
               variant="ghost"
               size="icon"
               onClick={onDelete}
-              className="absolute right-10 top-10 text-red-500 hover:text-red-600 hover:bg-red-500/10 w-10 h-10 rounded-xl transition-colors"
+              className="absolute right-10 top-10 text-red-500 hover:text-red-600 hover:bg-red-500/10 w-10 h-10 rounded-lg transition-colors"
             >
               <Trash2 className="w-5 h-5" />
             </Button>
@@ -141,14 +181,14 @@ export function ActionSheet({
           <div className="space-y-4 mb-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">
-                Name
+                Name <span className="text-red-500 ml-1">*</span>
               </Label>
               <Input
                 value={nodeName}
                 onChange={(e) => setNodeName(e.target.value)}
                 maxLength={50}
                 placeholder="e.g. My Action"
-                className="h-12 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
+                className="h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm"
               />
             </div>
             <div className="space-y-2">
@@ -160,7 +200,7 @@ export function ActionSheet({
                 onChange={(e) => setNodeDescription(e.target.value)}
                 maxLength={200}
                 placeholder="Add a description..."
-                className="w-full flex min-h-[80px] rounded-xl border border-muted-foreground/20 bg-muted/30 px-3 py-2 text-sm hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                className="w-full flex min-h-[80px] rounded-lg border border-muted-foreground/20 bg-muted/30 px-3 py-2 text-sm hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 resize-none"
               />
             </div>
           </div>
@@ -169,7 +209,7 @@ export function ActionSheet({
             value={selectedAction}
             onValueChange={(val) => setSelectedAction(val as NodeType)}
           >
-            <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium [&_[data-description]]:hidden">
+            <SelectTrigger className="w-full h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium [&_[data-description]]:hidden">
               <SelectValue placeholder="Select an Action" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
@@ -178,7 +218,7 @@ export function ActionSheet({
                   <SelectItem
                     key={id}
                     value={id}
-                    className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                    className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                   >
                     <div className="flex flex-col items-start gap-1.5">
                       <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
@@ -203,7 +243,7 @@ export function ActionSheet({
             <div className="mt-6 space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Asset
+                  Asset <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Select
                   value={metadata.symbol}
@@ -211,7 +251,7 @@ export function ActionSheet({
                     setMetadata({ ...metadata, symbol: value })
                   }
                 >
-                  <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
+                  <SelectTrigger className="w-full h-10 px-4 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium">
                     <SelectValue placeholder="Select an asset" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
@@ -220,7 +260,7 @@ export function ActionSheet({
                         <SelectItem
                           key={id}
                           value={id}
-                          className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                          className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                         >
                           <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
                             {id}
@@ -234,7 +274,7 @@ export function ActionSheet({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Order Type
+                  Order Type <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Select
                   value={metadata.type}
@@ -242,14 +282,14 @@ export function ActionSheet({
                     setMetadata({ ...metadata, type: value })
                   }
                 >
-                  <SelectTrigger className="w-full h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-md font-medium">
+                  <SelectTrigger className="w-full h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium">
                     <SelectValue placeholder="Select order type" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
                     <SelectGroup>
                       <SelectItem
                         value="LONG"
-                        className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                        className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                       >
                         <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
                           LONG
@@ -257,7 +297,7 @@ export function ActionSheet({
                       </SelectItem>
                       <SelectItem
                         value="SHORT"
-                        className="cursor-pointer py-4 px-4 rounded-lg my-1 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                        className="cursor-pointer py-2 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
                       >
                         <span className="text-sm font-semibold tracking-tight group-hover:text-primary transition-colors">
                           SHORT
@@ -270,14 +310,14 @@ export function ActionSheet({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground">
-                  Quantity
+                  Quantity <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   type="text"
                   inputMode="decimal"
                   value={qtyStr}
                   onChange={(e) => setQtyStr(e.target.value)}
-                  className={`h-14 px-4 bg-muted/30 border-muted-foreground/20 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isQtyInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
+                  className={`h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus-visible:ring-4 focus-visible:ring-primary/10 shadow-sm ${isQtyInvalid ? "border-red-500 focus-visible:ring-red-500/20" : ""}`}
                   placeholder="e.g. 1.5"
                 />
                 {isQtyInvalid && (
@@ -286,6 +326,51 @@ export function ActionSheet({
                   </p>
                 )}
               </div>
+
+              {platformRequirements && platformRequirements.map((req) => (
+                <div key={req.label} className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    {req.label} <span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Select
+                    value={metadata.credentials?.[req.label] || ""}
+                    onValueChange={(val) => {
+                      setMetadata({
+                        ...metadata,
+                        credentials: {
+                          ...(metadata.credentials || {}),
+                          [req.label]: val,
+                        },
+                      });
+                    }}
+                  >
+                      <SelectTrigger className="w-full h-10 px-3 bg-muted/30 border-muted-foreground/20 rounded-lg hover:bg-muted/50 transition-colors focus:ring-4 focus:ring-primary/10 shadow-sm text-sm font-medium">
+                      <SelectValue placeholder={`Select ${req.label}`} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-muted-foreground/20 shadow-xl overflow-hidden p-1">
+                      <SelectGroup>
+                        {vaultCredentials.length === 0 ? (
+                          <div className="py-4 px-4 text-sm text-muted-foreground text-center">
+                            No credentials in vault
+                          </div>
+                        ) : (
+                          vaultCredentials.map((cred) => (
+                            <SelectItem
+                              key={cred._id}
+                              value={cred._id}
+                              className="cursor-pointer py-2.5 px-3 rounded-lg my-0.5 hover:bg-accent/80 focus:bg-accent transition-all duration-200 group"
+                            >
+                              <span className="text-sm font-medium tracking-tight group-hover:text-primary transition-colors">
+                                {cred.name}
+                              </span>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -296,18 +381,19 @@ export function ActionSheet({
               onSelect(selectedAction as NodeType, nodeName, nodeDescription, {
                 ...metadata,
                 qty: parseFloat(qtyStr),
+                platform: selectedAction,
               } as NodeMetadata);
             }}
             disabled={isActionInvalid}
             type="submit"
-            className="w-full h-12 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-200 order-2"
+            className="w-full h-10 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 order-2"
           >
             {initialNode ? "Save Changes" : "Create"}
           </Button>
           <SheetClose asChild>
             <Button
               variant="outline"
-              className="w-full h-12 rounded-xl font-medium border-muted-foreground/30 hover:bg-muted/50 transition-all order-1"
+              className="w-full h-10 rounded-lg font-medium border-muted-foreground/30 hover:bg-muted/50 transition-all order-1"
             >
               Cancel
             </Button>
