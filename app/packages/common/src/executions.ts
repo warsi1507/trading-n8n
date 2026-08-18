@@ -17,8 +17,8 @@ export interface INodeExecution {
 }
 
 export interface IExecution {
-  workflow_id: string; // Stored as string in common, ObjectId in DB schema
-  user_id: string; // Stored as string in common, ObjectId in DB schema
+  workflow_id: string;
+  user_id: string;
   status: ExecutionStatus;
   started_at: Date;
   ended_at?: Date;

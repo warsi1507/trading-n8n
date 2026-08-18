@@ -124,7 +124,55 @@ Before allowing a Draft to be copied to Deployed:
 
 ---
 
-## Future Collections Scope
+## 3. Credentials (`credentials`)
 
-3. **Credentials (`credentials`)**: Will act as a secure vault storing encrypted external tokens (like Solana tokens, OAuth tokens, API keys) linked to a specific `user_id`.
-4. **Executions (`executions`)**: Will log historical runs, linked to `workflow_id`, storing inputs, outputs, timestamps, and error traces. Will execute exclusively against the `deployed_version.nodes` array.
+Acts as a secure vault storing AES-256-GCM encrypted external tokens (like Hyperliquid API keys) linked to a specific `user_id`. The application prevents storing plaintext keys at rest to protect user security.
+
+### Collection Structure
+
+```javascript
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."), // Immutable: Matches User._id
+  "name": "Hyperliquid Mainnet", // Display name
+  "encrypted_value": "U2FsdGVkX1...", // The cipher text
+  "iv": "3d5f...", // Initialization vector
+  "auth_tag": "abc1...", // Authentication tag
+  "created_at": ISODate("2026-08-16T12:00:00Z"),
+  "updated_at": ISODate("2026-08-16T12:00:00Z")
+}
+```
+
+### Encryption Model
+- **Algorithm**: AES-256-GCM
+- **Process**: Token is symmetrically encrypted on `POST` using a master `ENCRYPTION_KEY` located in `.env`.
+- **Decryption**: Backend decrypts the token dynamically on `GET` to permit UI functionalities like "Eye" view toggling and copying, sending it back to the authenticated frontend.
+
+---
+
+## 4. Executions (`executions`)
+
+This collection logs the historical runs of a deployed workflow. It tracks the overarching execution status as well as the step-by-step progress of individual nodes.
+
+### Collection Structure
+
+```javascript
+{
+  "_id": ObjectId("..."),
+  "workflow_id": ObjectId("..."),
+  "user_id": ObjectId("..."),
+  "status": "SUCCESS",
+  "started_at": ISODate("2026-08-18T10:00:00Z"),
+  "ended_at": ISODate("2026-08-18T10:00:05Z"),
+  "nodes": [
+    {
+      "node_id": "react-flow-uuid-1",
+      "status": "SUCCESS",
+      "started_at": ISODate("2026-08-18T10:00:00Z"),
+      "ended_at": ISODate("2026-08-18T10:00:02Z"),
+      "output_data": { "order_id": "12345", "filled_price": 60000 },
+      "error": null
+    }
+  ]
+}
+```

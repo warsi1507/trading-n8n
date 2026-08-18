@@ -72,7 +72,7 @@ const executionSchema = new Schema<IExecutionModel>(
     },
     nodes: [nodeExecutionSchema],
   },
-  { timestamps: false }, // We use custom started_at/ended_at instead of general createdAt/updatedAt
+  { timestamps: false },
 );
 
 export const Execution = model<IExecutionModel>("Execution", executionSchema);
