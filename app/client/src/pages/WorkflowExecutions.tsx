@@ -11,13 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
-import { WebhookTrigger } from "@/nodes/triggers/WebhookTrigger";
 
 const nodeTypes = {
   priceTrigger: PriceTrigger,
   timeTrigger: TimeTrigger,
   backpack: Backpack,
-  webhookTrigger: WebhookTrigger,
 };
 
 function JsonViewer({ data, name = "data" }: { data: any; name?: string }) {
