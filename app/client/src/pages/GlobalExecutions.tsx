@@ -86,12 +86,12 @@ export default function GlobalExecutions() {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Execution History</h1>
-          <p className="text-muted-foreground mt-1">A global log of all your automated trading runs.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Executions</h1>
+          <p className="text-muted-foreground mt-1">Global log of all your automated trading runs.</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-20">
+      <div className="flex-1 overflow-y-auto pr-2 space-y-2 pb-20">
         {loading && executions.length === 0 ? (
           <div className="flex items-center justify-center h-40">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -105,13 +105,13 @@ export default function GlobalExecutions() {
           executions.map((exec) => (
             <Card
               key={exec._id}
-              onClick={() => navigate(`/workflows/${exec.workflow_id?.display_id}/executions`)}
-              className="bg-card hover:bg-accent/50 transition-colors cursor-pointer rounded-xl"
+              onClick={() => navigate(`/workflows/${exec.workflow_id?.display_id}/executions?execId=${exec.display_id || exec._id}`)}
+              className="bg-black/[0.02] dark:bg-white/[0.02] border-gray-200 dark:border-white/10 shadow-none hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors group rounded-xl cursor-pointer"
             >
-              <CardContent className="p-0 flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 px-5">
+              <CardContent className="p-0 flex items-center gap-4 py-3 px-4 min-h-[60px]">
                 
                 {/* ID Badges */}
-                <div className="shrink-0 flex items-center gap-2">
+                <div className="shrink-0 hidden sm:flex items-center gap-2">
                   <div className="font-mono text-[11px] font-medium w-fit border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-1 rounded-md">
                     {exec.workflow_id?.display_id || 'deleted-workflow'}
                   </div>
@@ -120,18 +120,18 @@ export default function GlobalExecutions() {
                   </div>
                 </div>
 
-                {/* Name & Description */}
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="font-semibold text-foreground truncate text-base">
-                    {exec.workflow_id?.name || 'Deleted Workflow'}
-                  </div>
-                  <div className="text-sm text-muted-foreground truncate">
-                    {exec.workflow_id?.description || 'No description provided.'}
-                  </div>
+                {/* Name */}
+                <div className="font-semibold text-foreground truncate min-w-0 flex-1 md:flex-none md:w-48 text-base">
+                  {exec.workflow_id?.name || 'Deleted Workflow'}
+                </div>
+
+                {/* Description */}
+                <div className="hidden md:flex flex-1 min-w-0 items-center text-sm text-muted-foreground truncate w-full text-left">
+                  {exec.workflow_id?.description || 'No description provided.'}
                 </div>
 
                 {/* Status */}
-                <div className="shrink-0 mt-2 sm:mt-0 ml-auto">
+                <div className="ml-auto shrink-0 flex items-center justify-end gap-1">
                   <StatusBadge status={exec.status} />
                 </div>
               </CardContent>
