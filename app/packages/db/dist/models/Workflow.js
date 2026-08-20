@@ -133,12 +133,15 @@ const workflowSchema = new Schema({
         default: null,
     },
 }, { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } });
-// Mongoose Pre-Save Hook to enforce invariant:
-// An archived workflow must always be DRAFT and inactive.
 workflowSchema.pre("save", function () {
     if (this.is_archived) {
         this.status = "DRAFT";
         this.is_active = false;
+    }
+    if (this.isModified("status") && this.status === "DEPLOYED") {
+        if (!this.draft_version?.is_valid) {
+            throw new Error("Database Lock: Cannot deploy a workflow that has not been validated.");
+        }
     }
 });
 export const Workflow = model("Workflow", workflowSchema);

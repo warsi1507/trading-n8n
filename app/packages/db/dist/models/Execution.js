@@ -26,7 +26,7 @@ const nodeExecutionSchema = new Schema({
         type: Schema.Types.Mixed,
     },
     error: {
-        type: String,
+        type: Schema.Types.Mixed,
     },
 }, { _id: false });
 const executionSchema = new Schema({
@@ -69,4 +69,23 @@ const executionSchema = new Schema({
     },
     nodes: [nodeExecutionSchema],
 }, { timestamps: false });
+executionSchema.pre("save", async function () {
+    if (this.isNew) {
+        const Workflow = this.db.model("Workflow");
+        const workflow = await Workflow.findById(this.workflow_id);
+        if (!workflow) {
+            throw new Error("Workflow not found for this execution.");
+        }
+        if (workflow.status !== "DEPLOYED" && workflow.status !== "PAUSED") {
+            throw new Error(`Cannot create execution. Workflow is in status: ${workflow.status}. Only DEPLOYED or PAUSED workflows can execute.`);
+        }
+    }
+    else {
+        // Prevent modifications if the execution was already in a terminal state
+        const original = await this.collection.findOne({ _id: this._id });
+        if (original && ["SUCCESS", "FAILED", "CANCELED"].includes(original.status)) {
+            throw new Error(`Immutability lock: Cannot modify execution ${this.display_id} because it is already in a terminal state (${original.status}).`);
+        }
+    }
+});
 export const Execution = model("Execution", executionSchema);
