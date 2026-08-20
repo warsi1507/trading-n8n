@@ -13,7 +13,7 @@ const nodeExecutionSchema = new Schema<INodeExecution>(
     },
     status: {
       type: String,
-      enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "SKIPPED"],
+      enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "SKIPPED", "UNKNOWN"],
       required: true,
       default: "PENDING",
     },
@@ -22,6 +22,9 @@ const nodeExecutionSchema = new Schema<INodeExecution>(
     },
     ended_at: {
       type: Date,
+    },
+    duration_ms: {
+      type: Number,
     },
     output_data: {
       type: Schema.Types.Mixed,
@@ -34,6 +37,7 @@ const nodeExecutionSchema = new Schema<INodeExecution>(
 );
 
 export interface IExecutionModel extends Document {
+  display_id: string;
   workflow_id: Types.ObjectId;
   user_id: Types.ObjectId;
   status: ExecutionStatus;
@@ -44,6 +48,10 @@ export interface IExecutionModel extends Document {
 
 const executionSchema = new Schema<IExecutionModel>(
   {
+    display_id: {
+      type: String,
+      required: true,
+    },
     workflow_id: {
       type: Schema.Types.ObjectId,
       ref: "Workflow",
@@ -58,7 +66,7 @@ const executionSchema = new Schema<IExecutionModel>(
     },
     status: {
       type: String,
-      enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED"],
+      enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED", "UNKNOWN"],
       required: true,
       default: "PENDING",
     },
