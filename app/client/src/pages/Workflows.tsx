@@ -334,7 +334,7 @@ export default function Workflows() {
       {/* Floating Action Button */}
       <button
         onClick={createWorkflow}
-        className="fixed bottom-8 right-8 md:bottom-12 md:right-12 h-12 px-6 bg-sky-400 hover:bg-sky-300 text-sky-950 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 group border border-sky-400/20"
+        className="fixed bottom-2 right-4 md:bottom-4 md:right-6 h-12 px-6 bg-sky-400 hover:bg-sky-300 text-sky-950 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 group border border-sky-400/20"
       >
         <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
         <span>Workflow</span>
@@ -361,9 +361,9 @@ function WorkflowCard({
       onClick={onClick}
       className={`bg-black/[0.02] dark:bg-white/[0.02] border-gray-200 dark:border-white/10 shadow-none hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors group rounded-xl ${isActiveTab !== "ARCHIVED" ? "cursor-pointer" : ""}`}
     >
-      <CardContent className="p-0 flex items-center gap-4 py-4 px-5 min-h-[72px]">
+      <CardContent className="p-0 flex items-center gap-4 py-3 px-4 min-h-[60px]">
         {/* ID Badge */}
-        <div className="shrink-0 hidden sm:flex items-center justify-center font-mono text-[11px] font-medium w-28 truncate border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-1 rounded-md">
+        <div className="shrink-0 hidden sm:flex items-center justify-center font-mono text-[11px] font-medium w-fit border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 px-2 py-1 rounded-md">
           {workflow.display_id}
         </div>
 
