@@ -13,6 +13,7 @@ export default function Header() {
   const navLinks = [
     { path: "/", label: "Home" },
     { path: "/workflows", label: "Workflows" },
+    { path: "/workflows/executions", label: "Executions" },
     { path: "/about", label: "About" },
   ];
 

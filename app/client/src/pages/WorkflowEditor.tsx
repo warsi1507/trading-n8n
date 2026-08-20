@@ -605,7 +605,10 @@ export default function WorkflowEditor() {
         nodesDraggable={!isReadOnly}
         nodesConnectable={!isReadOnly}
         elementsSelectable={!isReadOnly}
-        fitView
+        minZoom={0.5}
+        maxZoom={2}
+        defaultViewport={{ x: 100, y: 50, zoom: 1 }}
+        proOptions={{ hideAttribution: true }}
       >
         <Background gap={16} size={1} />
         {!isReadOnly && (

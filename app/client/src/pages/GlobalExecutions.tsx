@@ -118,7 +118,7 @@ export default function GlobalExecutions() {
                     {exec.workflow_id?.display_id || 'deleted-workflow'}
                   </div>
                   <div className="font-mono text-[11px] font-medium w-fit border border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-md">
-                    exec-{exec.display_id || exec._id.substring(0, 8)}
+                    execution-{exec.display_id || exec._id.substring(0, 8)}
                   </div>
                 </div>
 
@@ -143,8 +143,8 @@ export default function GlobalExecutions() {
                   </TooltipProvider>
                 </div>
 
-                {/* Status */}
-                <div className="ml-auto shrink-0 flex items-center justify-end gap-1">
+                {/* Status & Actions */}
+                <div className="ml-auto shrink-0 flex items-center justify-end gap-2">
                   <StatusBadge status={exec.status} />
                 </div>
               </CardContent>

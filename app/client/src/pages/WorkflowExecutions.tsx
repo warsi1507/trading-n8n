@@ -111,9 +111,6 @@ export default function WorkflowExecutions() {
           if (wfData.deployed_version) {
             setNodes(wfData.deployed_version.nodes || []);
             setEdges(wfData.deployed_version.edges || []);
-          } else if (wfData.draft_version) {
-            setNodes(wfData.draft_version.nodes || []);
-            setEdges(wfData.draft_version.edges || []);
           }
         }
 
@@ -210,7 +207,8 @@ export default function WorkflowExecutions() {
   };
 
   const formatDate = (d: string | Date) => new Date(d).toLocaleString();
-  const formatDuration = (ms?: number) => {
+  const formatDuration = (ms?: number, status?: string) => {
+    if (status === "RUNNING" || status === "PENDING") return "-";
     if (ms === undefined) return "-";
     if (ms < 1000) return `${ms}ms`;
     return `${(ms / 1000).toFixed(2)}s`;
@@ -250,6 +248,14 @@ export default function WorkflowExecutions() {
           {/* Left Panel: ReactFlow Canvas */}
           <ResizablePanel defaultSize={65} minSize={30}>
             <div className="w-full h-full relative">
+              {selectedExecution && (selectedExecution.status === 'RUNNING' || selectedExecution.status === 'PENDING') && (
+                <div className="absolute top-4 right-4 z-10">
+                  <Button disabled variant="secondary" className="gap-2 shadow-sm">
+                    <Ban className="w-4 h-4" />
+                    Cancel
+                  </Button>
+                </div>
+              )}
               <ReactFlow
                 nodes={displayNodes}
                 edges={edges}
@@ -258,7 +264,10 @@ export default function WorkflowExecutions() {
                 nodesConnectable={false}
                 nodesDraggable={false}
                 elementsSelectable={true}
-                fitView
+                minZoom={0.5}
+                maxZoom={2}
+                defaultViewport={{ x: 100, y: 50, zoom: 1 }}
+                proOptions={{ hideAttribution: true }}
               >
                 <Background color="hsl(var(--muted-foreground))" gap={16} />
               </ReactFlow>
@@ -294,15 +303,15 @@ export default function WorkflowExecutions() {
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
                             <StatusIcon status={exec.status} />
-                            <span className="font-mono text-sm font-semibold">Exec-{exec.display_id || exec._id.substring(0,8)}</span>
-                            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4">{formatDuration(exec.duration_ms)}</Badge>
+                            <span className="font-mono text-sm font-semibold">Execution-{exec.display_id || exec._id.substring(0,8)}</span>
+                            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4">{formatDuration(exec.duration_ms, exec.status)}</Badge>
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {formatDate(exec.started_at)}
                           </div>
                         </div>
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center gap-1">
                           <ChevronRight className="w-4 h-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </div>
@@ -319,7 +328,7 @@ export default function WorkflowExecutions() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <StatusIcon status={selectedExecution.status} />
-                        <span className="font-mono font-bold text-lg">Exec-{selectedExecution.display_id || selectedExecution._id.substring(0,8)}</span>
+                        <span className="font-mono font-bold text-lg">Execution-{selectedExecution.display_id || selectedExecution._id.substring(0,8)}</span>
                       </div>
                     </div>
                     <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full" onClick={handleBackToList}>
@@ -328,7 +337,7 @@ export default function WorkflowExecutions() {
                   </div>
                   <div className="flex gap-4 text-xs text-muted-foreground px-1">
                     <div><strong>Start:</strong> {formatDate(selectedExecution.started_at)}</div>
-                    <div><strong>Duration:</strong> {formatDuration(selectedExecution.duration_ms)}</div>
+                    <div><strong>Duration:</strong> {formatDuration(selectedExecution.duration_ms, selectedExecution.status)}</div>
                   </div>
                 </div>
 
@@ -364,7 +373,7 @@ export default function WorkflowExecutions() {
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-muted-foreground">Duration</span>
-                          <span className="font-mono">{formatDuration(activeNodeExec?.duration_ms)}</span>
+                          <span className="font-mono">{formatDuration(activeNodeExec?.duration_ms, activeNodeExec?.status)}</span>
                         </div>
                       </div>
 
