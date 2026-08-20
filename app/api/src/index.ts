@@ -3,7 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from '@trading-n8n/db';
 
-dotenv.config();
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 9000;

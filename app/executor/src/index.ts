@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import { connectDB } from "@trading-n8n/db";
+import path from "path";
 
-dotenv.config();
+const envPath = path.resolve(process.cwd(), "../../.env");
+console.log("Loading env from:", envPath);
+dotenv.config({ path: envPath });
 
 async function startExecutor() {
   console.log("Starting Execution Engine...");

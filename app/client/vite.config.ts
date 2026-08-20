@@ -4,9 +4,11 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+  const envDir = path.resolve(process.cwd(), "../../");
+  const env = loadEnv(mode, envDir, "");
 
   return {
+    envDir,
     plugins: [react()],
     resolve: {
       alias: {
