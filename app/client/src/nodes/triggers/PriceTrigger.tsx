@@ -24,7 +24,7 @@ export function PriceTrigger({
           className="w-8 h-8 opacity-80"
         />
       }
-      tags={["Price Trigger", data.metadata.asset, `$${data.metadata.price}`]}
+      tags={["Price Trigger", data.metadata?.asset || "Any", `$${data.metadata?.price || "0"}`]}
       isConnectable={isConnectable}
       kind={data.kind}
     />

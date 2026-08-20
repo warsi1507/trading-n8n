@@ -23,7 +23,7 @@ import { TriggerSheet } from "../components/TriggerSheet";
 import { ActionSheet } from "../components/ActionSheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Trash, Pencil, CheckCircle2, Pause, List } from "lucide-react";
+import { Plus, Play, Trash, Pencil, CheckCircle2, Pause, Activity } from "lucide-react";
 import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
@@ -186,6 +186,12 @@ export default function WorkflowEditor() {
       });
       if (res.ok) {
         const data = await res.json();
+        
+        // If it was already deployed and active, warn them about canceled executions
+        if (workflowData?.status === "DEPLOYED") {
+          window.alert("Warning: Deploying a new version has immediately canceled any running executions of the old version. Please verify your exchange platform for any unmanaged positions.");
+        }
+
         setViewMode("deployed");
         setWorkflowData(data);
       }
@@ -653,7 +659,7 @@ export default function WorkflowEditor() {
               onClick={() => navigate(`/workflows/${display_id}/executions`)}
               className="gap-2 rounded-full h-11 px-6 shadow-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-bold transition-all border border-border"
             >
-              <List className="w-4 h-4" />
+              <Activity className="w-4 h-4" />
               See Executions
             </Button>
           </Panel>

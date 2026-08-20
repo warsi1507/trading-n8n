@@ -26,8 +26,8 @@ export function Backpack({
       }
       tags={[
         "Backpack",
-        data.metadata.type,
-        `${data.metadata.qty} ${data.metadata.symbol}`,
+        data.metadata?.type || "Trade",
+        `${data.metadata?.qty || 0} ${data.metadata?.symbol || "Asset"}`,
       ]}
       isConnectable={isConnectable}
       kind={data.kind}

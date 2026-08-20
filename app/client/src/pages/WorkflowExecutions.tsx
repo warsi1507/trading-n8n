@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@clerk/react";
-import { ArrowLeft, Loader2, CheckCircle2, XCircle, Clock, AlertCircle, Ban, ArrowRight, X, ChevronDown, ChevronRight, List } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2, XCircle, Clock, AlertCircle, Ban, X, ChevronDown, ChevronRight, Activity } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { ReactFlow, Background, Controls, MiniMap, useNodesState, useEdgesState } from "@xyflow/react";
+import { ReactFlow, Background, useNodesState, useEdgesState } from "@xyflow/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -261,8 +261,6 @@ export default function WorkflowExecutions() {
                 fitView
               >
                 <Background color="hsl(var(--muted-foreground))" gap={16} />
-                <Controls />
-                <MiniMap zoomable pannable className="dark:bg-background dark:border-border" />
               </ReactFlow>
             </div>
           </ResizablePanel>
@@ -276,7 +274,7 @@ export default function WorkflowExecutions() {
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b shrink-0 flex items-center justify-between bg-muted/20">
                   <h3 className="font-semibold flex items-center gap-2">
-                    <List className="w-4 h-4" /> 
+                    <Activity className="w-4 h-4" /> 
                     Executions
                   </h3>
                   <Badge variant="secondary">{executions.length}</Badge>
@@ -291,18 +289,21 @@ export default function WorkflowExecutions() {
                       <div 
                         key={exec._id} 
                         onClick={() => handleExecutionSelect(exec.display_id || exec._id)}
-                        className="p-3 rounded-xl border bg-card hover:bg-accent/50 cursor-pointer transition-colors flex flex-col gap-2"
+                        className="p-3 rounded-xl border bg-card hover:bg-accent/50 cursor-pointer transition-colors flex justify-between gap-2 group"
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2">
                             <StatusIcon status={exec.status} />
-                            <span className="font-mono text-sm font-semibold">{exec.display_id || exec._id.substring(0,8)}</span>
+                            <span className="font-mono text-sm font-semibold">Exec-{exec.display_id || exec._id.substring(0,8)}</span>
+                            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4">{formatDuration(exec.duration_ms)}</Badge>
                           </div>
-                          <span className="text-xs text-muted-foreground">{formatDuration(exec.duration_ms)}</span>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDate(exec.started_at)}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDate(exec.started_at)}
+                        <div className="flex items-center justify-center">
+                          <ChevronRight className="w-4 h-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </div>
                     ))
@@ -315,13 +316,10 @@ export default function WorkflowExecutions() {
                 {/* Header */}
                 <div className="p-4 border-b shrink-0 bg-muted/20 flex flex-col gap-3">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="w-8 h-8 -ml-2 rounded-full" onClick={handleBackToList}>
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <StatusIcon status={selectedExecution.status} />
-                        <span className="font-mono font-bold text-lg">{selectedExecution.display_id || selectedExecution._id.substring(0,8)}</span>
+                        <span className="font-mono font-bold text-lg">Exec-{selectedExecution.display_id || selectedExecution._id.substring(0,8)}</span>
                       </div>
                     </div>
                     <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full" onClick={handleBackToList}>
@@ -396,7 +394,9 @@ export default function WorkflowExecutions() {
                           <h4 className="text-sm font-semibold text-red-500">Error</h4>
                           <div className="bg-red-500/5 border border-red-500/30 rounded-xl p-3 overflow-hidden">
                             <div className="text-xs font-mono text-red-600 dark:text-red-400 whitespace-pre-wrap">
-                              {activeNodeExec.error}
+                              {typeof activeNodeExec.error === 'object' 
+                                ? (activeNodeExec.error.message || JSON.stringify(activeNodeExec.error, null, 2))
+                                : String(activeNodeExec.error)}
                             </div>
                           </div>
                         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Play, ArchiveRestore, List } from "lucide-react";
+import { Plus, Play, ArchiveRestore, Activity } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";
@@ -106,6 +106,7 @@ export default function Workflows() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
+      window.alert("Warning: Archiving this workflow has immediately canceled any running executions. Please verify your exchange platform for any unmanaged positions.");
       setArchiveWorkflow(null);
       setArchiveConfirmName("");
       fetchWorkflows();
@@ -336,7 +337,7 @@ export default function Workflows() {
         onClick={() => navigate("/workflows/executions")}
         className="fixed bottom-16 right-4 md:bottom-20 md:right-6 h-12 w-[160px] bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 border border-border"
       >
-        <List size={20} />
+        <Activity size={20} />
         <span>Executions</span>
       </button>
 
