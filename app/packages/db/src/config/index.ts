@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
+import { createLogger } from "@trading-n8n/logger";
+
+const logger = createLogger("DB");
 
 export const connectDB = async (uri: string) => {
   try {
     const conn = await mongoose.connect(uri);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
     throw error;

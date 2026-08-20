@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@trading-n8n/common": "*",
+    "@trading-n8n/logger": "^1.0.0",
     "@types/mongoose": "^5.11.96",
     "mongodb": "^7.5.0",
     "mongoose": "^9.9.2"

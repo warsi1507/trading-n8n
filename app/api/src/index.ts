@@ -41,17 +41,21 @@ app.get('/health', (req, res) => {
   });
 });
 
+import { createLogger } from '@trading-n8n/logger';
+
+const logger = createLogger('API');
+
 // Initialize DB and start server
 const startServer = async () => {
   const API_URI = process.env.API_URI || `http://localhost:${PORT}`;
   app.listen(PORT, () => {
-    console.log(`Server running on ${API_URI}`);
+    logger.info(`Server running on ${API_URI}`);
   });
   
   try {
     await connectDB(MONGO_URI);
   } catch (error) {
-    console.error('Failed to connect to DB:', error);
+    logger.error('Failed to connect to DB', { error: error instanceof Error ? error.message : error });
   }
 };
 
