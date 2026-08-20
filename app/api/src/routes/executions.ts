@@ -21,14 +21,14 @@ router.get('/', async (req: Request, res: Response): Promise<any> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = 10;
 
-    const executions = await Execution.find({ user_id: user._id })
+    const executions = await Execution.find({ user_id: user._id, workflow_deleted: { $ne: true } })
       .sort({ started_at: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate('workflow_id', 'display_id name description')
       .lean();
 
-    const total = await Execution.countDocuments({ user_id: user._id });
+    const total = await Execution.countDocuments({ user_id: user._id, workflow_deleted: { $ne: true } });
 
     return res.status(200).json({
       executions,

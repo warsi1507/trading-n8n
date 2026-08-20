@@ -16,7 +16,7 @@ export interface INodeExecution {
   duration_ms?: number;
   input_data?: any;
   output_data?: any;
-  error?: string;
+  error?: any;
 }
 
 export interface IExecution {
@@ -27,4 +27,5 @@ export interface IExecution {
   started_at: Date;
   ended_at?: Date;
   nodes: INodeExecution[];
+  workflow_deleted?: boolean;
 }

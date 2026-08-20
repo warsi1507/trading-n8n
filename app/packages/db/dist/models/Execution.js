@@ -6,7 +6,7 @@ const nodeExecutionSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "SKIPPED"],
+        enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "SKIPPED", "UNKNOWN"],
         required: true,
         default: "PENDING",
     },
@@ -16,6 +16,12 @@ const nodeExecutionSchema = new Schema({
     ended_at: {
         type: Date,
     },
+    duration_ms: {
+        type: Number,
+    },
+    input_data: {
+        type: Schema.Types.Mixed,
+    },
     output_data: {
         type: Schema.Types.Mixed,
     },
@@ -24,6 +30,10 @@ const nodeExecutionSchema = new Schema({
     },
 }, { _id: false });
 const executionSchema = new Schema({
+    display_id: {
+        type: String,
+        required: true,
+    },
     workflow_id: {
         type: Schema.Types.ObjectId,
         ref: "Workflow",
@@ -38,7 +48,7 @@ const executionSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED"],
+        enum: ["PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED", "UNKNOWN"],
         required: true,
         default: "PENDING",
     },
@@ -49,6 +59,13 @@ const executionSchema = new Schema({
     },
     ended_at: {
         type: Date,
+    },
+    duration_ms: {
+        type: Number,
+    },
+    workflow_deleted: {
+        type: Boolean,
+        default: false,
     },
     nodes: [nodeExecutionSchema],
 }, { timestamps: false });

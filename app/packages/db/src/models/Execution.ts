@@ -33,7 +33,7 @@ const nodeExecutionSchema = new Schema<INodeExecution>(
       type: Schema.Types.Mixed,
     },
     error: {
-      type: String,
+      type: Schema.Types.Mixed,
     },
   },
   { _id: false },
@@ -46,7 +46,9 @@ export interface IExecutionModel extends Document {
   status: ExecutionStatus;
   started_at: Date;
   ended_at?: Date;
+  duration_ms?: number;
   nodes: INodeExecution[];
+  workflow_deleted?: boolean;
 }
 
 const executionSchema = new Schema<IExecutionModel>(
@@ -80,6 +82,13 @@ const executionSchema = new Schema<IExecutionModel>(
     },
     ended_at: {
       type: Date,
+    },
+    duration_ms: {
+      type: Number,
+    },
+    workflow_deleted: {
+      type: Boolean,
+      default: false,
     },
     nodes: [nodeExecutionSchema],
   },

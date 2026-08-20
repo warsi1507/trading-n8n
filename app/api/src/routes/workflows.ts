@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { clerkMiddleware, getAuth } from '@clerk/express';
-import { Workflow, User, Counter } from '@trading-n8n/db';
+import { Workflow, User, Counter, Execution } from '@trading-n8n/db';
 
 const router = Router();
 
@@ -284,6 +284,13 @@ router.post('/:display_id/deploy', async (req: Request, res: Response): Promise<
     workflow.is_active = true;
     
     await workflow.save();
+
+    // Cascade: If deploying a new version, cancel any running executions of the old version
+    await Execution.updateMany(
+      { workflow_id: workflow._id, status: { $in: ['PENDING', 'RUNNING'] } },
+      { $set: { status: 'CANCELED', ended_at: new Date() } }
+    );
+
     res.json(workflow);
   } catch (error) {
     console.error('Deploy error:', error);
@@ -342,6 +349,17 @@ router.post('/:display_id/archive', async (req: Request, res: Response): Promise
     
     // The Mongoose pre('save') hook handles setting status to DRAFT and is_active to false
     await workflow.save();
+
+    // Cascade: mark active executions as CANCELED, and all as workflow_deleted
+    await Execution.updateMany(
+      { workflow_id: workflow._id, status: { $in: ['PENDING', 'RUNNING'] } },
+      { $set: { status: 'CANCELED', ended_at: new Date() } }
+    );
+    await Execution.updateMany(
+      { workflow_id: workflow._id },
+      { $set: { workflow_deleted: true } }
+    );
+
     res.json(workflow);
   } catch (error) {
     console.error('Archive error:', error);
