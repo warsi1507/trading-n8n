@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Play, ArchiveRestore } from "lucide-react";
+import { Plus, Play, ArchiveRestore, Pause, List } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";
@@ -330,6 +330,15 @@ export default function Workflows() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Executions Button */}
+      <button
+        onClick={() => navigate("/workflows/executions")}
+        className="fixed bottom-[3.5rem] right-4 md:bottom-[4.5rem] md:right-6 h-12 px-6 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 border border-border"
+      >
+        <List size={20} />
+        <span>Executions</span>
+      </button>
 
       {/* Floating Action Button */}
       <button

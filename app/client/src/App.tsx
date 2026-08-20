@@ -14,6 +14,8 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import Workflows from "./pages/Workflows";
+import GlobalExecutions from "./pages/GlobalExecutions";
+import WorkflowExecutions from "./pages/WorkflowExecutions";
 
 // Protected Route Wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +48,24 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Workflows />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/workflows/executions"
+                  element={
+                    <ProtectedRoute>
+                      <GlobalExecutions />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/workflows/:display_id/executions"
+                  element={
+                    <ProtectedRoute>
+                      <ReactFlowProvider>
+                        <WorkflowExecutions />
+                      </ReactFlowProvider>
                     </ProtectedRoute>
                   }
                 />
