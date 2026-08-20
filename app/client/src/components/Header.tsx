@@ -33,7 +33,7 @@ export default function Header() {
               className="h-24 w-auto -ml-4 hidden dark:block"
             />
             <span
-              className="text-2xl font-extrabold tracking-tight hidden sm:inline-block -ml-1 text-foreground"
+              className="text-2xl font-extrabold tracking-tight -ml-1 text-foreground"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
               FlowTrade

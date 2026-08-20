@@ -4,6 +4,12 @@ import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle, Clock, Ban } fr
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Execution {
   _id: string;
@@ -80,27 +86,23 @@ export default function GlobalExecutions() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-5xl h-[calc(100vh-4rem)] flex flex-col">
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/workflows")}>
-          <ArrowLeft size={20} />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Executions</h1>
-          <p className="text-muted-foreground mt-1">Global log of all your automated trading runs.</p>
-        </div>
-      </div>
+    <div className="pb-32 pt-24 w-[95%] lg:w-[85%] max-w-none ml-0 pr-4 md:pr-8 pl-4 sm:pl-[124px] md:pl-[140px] min-h-screen relative flex flex-col">
+      <h1
+        className="text-lg md:text-xl lg:text-[2rem] leading-[1.1] tracking-tight mb-8 text-foreground"
+        style={{ fontFamily: "'Nunito', sans-serif" }}
+      >
+        <span className="font-medium block">Executions</span>
+      </h1>
 
-      <div className="flex-1 overflow-y-auto pr-2 space-y-2 pb-20">
+      <div className="mt-0 flex flex-col gap-2 flex-1">
         {loading && executions.length === 0 ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-          </div>
+          <p className="text-muted-foreground py-12 text-center border rounded-xl border-dashed border-border/50">
+            Loading executions...
+          </p>
         ) : executions.length === 0 ? (
-          <div className="text-center p-12 border rounded-xl bg-card/50 border-dashed">
-            <h3 className="font-medium text-lg">No Executions Found</h3>
-            <p className="text-muted-foreground mt-2">You haven't run any workflows yet.</p>
-          </div>
+          <p className="text-muted-foreground py-12 text-center border rounded-xl border-dashed border-border/50">
+            No executions found. You haven't run any workflows yet.
+          </p>
         ) : (
           executions.map((exec) => (
             <Card
@@ -126,8 +128,19 @@ export default function GlobalExecutions() {
                 </div>
 
                 {/* Description */}
-                <div className="hidden md:flex flex-1 min-w-0 items-center text-sm text-muted-foreground truncate w-full text-left">
-                  {exec.workflow_id?.description || 'No description provided.'}
+                <div className="hidden md:flex flex-1 min-w-0 items-center">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <div className="text-sm text-muted-foreground truncate w-full text-left cursor-help">
+                          {exec.workflow_id?.description || 'No description provided.'}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[300px] p-3 text-sm" sideOffset={8}>
+                        <p>{exec.workflow_id?.description || 'No description provided.'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
 
                 {/* Status */}
@@ -141,24 +154,32 @@ export default function GlobalExecutions() {
 
         {/* Pagination Controls */}
         {!loading && totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 pt-6">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between py-4 border-t border-border/40 mt-4 px-0 shrink-0">
+            <div className="text-sm text-muted-foreground">
               Page {page} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            >
-              Next
-            </Button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="h-8 w-8 p-0 border-border/40 bg-transparent hover:bg-accent"
+              >
+                <span className="sr-only">Previous page</span>
+                {"<"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className="h-8 w-8 p-0 border-border/40 bg-transparent hover:bg-accent"
+              >
+                <span className="sr-only">Next page</span>
+                {">"}
+              </Button>
+            </div>
           </div>
         )}
       </div>
