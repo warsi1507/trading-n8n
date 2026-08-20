@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Play, ArchiveRestore, Pause, List } from "lucide-react";
+import { Plus, Play, ArchiveRestore, List } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";

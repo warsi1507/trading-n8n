@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@clerk/react";
-import { ArrowLeft, Loader2, Play, CheckCircle2, XCircle, Clock, AlertCircle, Ban, ArrowRight, X, ChevronDown, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { ArrowLeft, Loader2, CheckCircle2, XCircle, Clock, AlertCircle, Ban, ArrowRight, X, ChevronDown, ChevronRight, List } from "lucide-react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { ReactFlow, Background, Controls, MiniMap, useNodesState, useEdgesState } from "@xyflow/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
+import type { Workflow, IExecution, INodeExecution } from "@trading-n8n/common";
+import type { Node, Edge } from "@xyflow/react";
 
 const nodeTypes = {
-  priceTrigger: PriceTrigger,
-  timeTrigger: TimeTrigger,
+  "price-trigger": PriceTrigger,
+  "time-trigger": TimeTrigger,
   backpack: Backpack,
 };
 
@@ -79,15 +81,15 @@ export default function WorkflowExecutions() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
-  const [workflow, setWorkflow] = useState<any>(null);
-  const [executions, setExecutions] = useState<any[]>([]);
-  const [selectedExecution, setSelectedExecution] = useState<any>(null);
+  const [workflow, setWorkflow] = useState<Workflow | null>(null);
+  const [executions, setExecutions] = useState<(IExecution & { _id: string, duration_ms?: number })[]>([]);
+  const [selectedExecution, setSelectedExecution] = useState<(IExecution & { _id: string, duration_ms?: number }) | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // React Flow state
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes] = useNodesState<Node>([]);
+  const [edges, setEdges] = useEdgesState<Edge>([]);
 
   // Fetch workflow and execution list
   useEffect(() => {
@@ -150,7 +152,7 @@ export default function WorkflowExecutions() {
           setSelectedExecution(data);
           // Auto-select first failed node, or just first node
           if (data.nodes && data.nodes.length > 0) {
-            const failedNode = data.nodes.find((n: any) => n.status === "FAILED");
+            const failedNode = data.nodes.find((n: INodeExecution) => n.status === "FAILED");
             setSelectedNodeId(failedNode ? failedNode.node_id : data.nodes[0].node_id);
           } else {
             setSelectedNodeId(null);
@@ -170,7 +172,7 @@ export default function WorkflowExecutions() {
       return nodes.map(n => ({ ...n, draggable: false, selectable: true }));
     }
 
-    const nodeStatusMap = new Map(selectedExecution.nodes.map((n: any) => [n.node_id, n]));
+    const nodeStatusMap = new Map(selectedExecution.nodes.map((n: INodeExecution) => [n.node_id, n]));
     
     return nodes.map(n => {
       const execNode = nodeStatusMap.get(n.id);
@@ -195,7 +197,7 @@ export default function WorkflowExecutions() {
     });
   }, [nodes, selectedExecution, selectedNodeId]);
 
-  const onNodeClick = useCallback((_: any, node: any) => {
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);
   }, []);
 
@@ -207,7 +209,7 @@ export default function WorkflowExecutions() {
     setSearchParams({});
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleString();
+  const formatDate = (d: string | Date) => new Date(d).toLocaleString();
   const formatDuration = (ms?: number) => {
     if (ms === undefined) return "-";
     if (ms < 1000) return `${ms}ms`;
@@ -224,7 +226,7 @@ export default function WorkflowExecutions() {
 
   // Find node details if execution is selected
   const activeNode = nodes.find(n => n.id === selectedNodeId);
-  const activeNodeExec = selectedExecution?.nodes?.find((n: any) => n.node_id === selectedNodeId);
+  const activeNodeExec = selectedExecution?.nodes?.find((n: INodeExecution) => n.node_id === selectedNodeId);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
@@ -243,10 +245,10 @@ export default function WorkflowExecutions() {
       </div>
 
       <div className="flex-1 overflow-hidden relative">
-        <PanelGroup direction="horizontal">
+        <ResizablePanelGroup direction="horizontal">
           
           {/* Left Panel: ReactFlow Canvas */}
-          <Panel defaultSize={65} minSize={30}>
+          <ResizablePanel defaultSize={65} minSize={30}>
             <div className="w-full h-full relative">
               <ReactFlow
                 nodes={displayNodes}
@@ -263,12 +265,12 @@ export default function WorkflowExecutions() {
                 <MiniMap zoomable pannable className="dark:bg-background dark:border-border" />
               </ReactFlow>
             </div>
-          </Panel>
+          </ResizablePanel>
 
-          <PanelResizeHandle className="w-1 bg-border/50 hover:bg-primary transition-colors cursor-col-resize" />
+          <ResizableHandle className="w-1 bg-border/50 hover:bg-primary transition-colors cursor-col-resize" />
 
           {/* Right Panel: Execution List OR Node Details */}
-          <Panel defaultSize={35} minSize={25} className="bg-card flex flex-col h-full border-l">
+          <ResizablePanel defaultSize={35} minSize={25} className="bg-card flex flex-col h-full border-l">
             {!selectedExecution ? (
               // List View
               <div className="flex flex-col h-full">
@@ -346,8 +348,8 @@ export default function WorkflowExecutions() {
                     <>
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-base">{activeNode.data?.name || "Unknown Node"}</h3>
-                          <p className="text-xs text-muted-foreground">{activeNode.data?.description || "No description"}</p>
+                          <h3 className="font-semibold text-base">{(activeNode.data?.name as string) || "Unknown Node"}</h3>
+                          <p className="text-xs text-muted-foreground">{(activeNode.data?.description as string) || "No description"}</p>
                         </div>
                         <Badge variant="outline" className="uppercase text-[10px]">
                           {activeNode.type}
@@ -404,8 +406,8 @@ export default function WorkflowExecutions() {
                 </div>
               </div>
             )}
-          </Panel>
-        </PanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );

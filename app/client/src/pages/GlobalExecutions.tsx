@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, CheckCircle2, XCircle, AlertCircle, Clock, Ban } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, AlertCircle, Clock, Ban } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/react";

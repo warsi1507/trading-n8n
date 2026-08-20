@@ -19,7 +19,6 @@ export function Vault() {
   const [visibleTokens, setVisibleTokens] = useState<Record<string, boolean>>({});
   const [copiedTokens, setCopiedTokens] = useState<Record<string, boolean>>({});
 
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [credToDelete, setCredToDelete] = useState<CredentialResponse | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
