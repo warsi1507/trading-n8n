@@ -13,6 +13,7 @@ const MONGO_URI = process.env.MONGO_URI as string;
 import webhookRoutes from './routes/webhooks';
 import workflowRoutes from './routes/workflows';
 import credentialsRoutes from './routes/credentials';
+import executionRoutes from './routes/executions';
 
 app.use(cors());
 
@@ -29,6 +30,7 @@ startCronJobs();
 // Mount API routes
 app.use('/api/workflows', workflowRoutes);
 app.use('/api/credentials', credentialsRoutes);
+app.use('/api/executions', executionRoutes);
 
 // Health Check Route
 app.get('/health', (req, res) => {
