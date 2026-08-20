@@ -23,7 +23,7 @@ import { TriggerSheet } from "../components/TriggerSheet";
 import { ActionSheet } from "../components/ActionSheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Play, Trash, Pencil, CheckCircle2 } from "lucide-react";
+import { Plus, Play, Trash, Pencil, CheckCircle2, Pause, List } from "lucide-react";
 import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
@@ -240,6 +240,27 @@ export default function WorkflowEditor() {
     saveWorkflowMetadata({ description: newDesc });
   };
 
+  const handleTogglePause = async () => {
+    if (!workflowData) return;
+    try {
+      const token = await getToken();
+      const newStatus = workflowData.status === "PAUSED" ? "DEPLOYED" : "PAUSED";
+      const res = await fetch(`/api/workflows/${display_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setWorkflowData({ ...workflowData, status: newStatus });
+      }
+    } catch (err) {
+      console.error("Failed to toggle pause", err);
+    }
+  };
+
   const hasTrigger = nodes.some((n) => n.data.kind === "trigger");
 
   const onNodesChange: OnNodesChange<AppNode> = useCallback(
@@ -357,8 +378,8 @@ export default function WorkflowEditor() {
                 {workflowName}
               </h1>
               {isReadOnly && (
-                <span className="text-[10px] uppercase font-bold tracking-wider bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20">
-                  Deployed
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${workflowData?.status === "PAUSED" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-green-500/10 text-green-500 border-green-500/20"}`}>
+                  {workflowData?.status === "PAUSED" ? "Paused" : "Deployed"}
                 </span>
               )}
             </div>
@@ -402,12 +423,25 @@ export default function WorkflowEditor() {
 
         <div className="flex gap-2 pointer-events-auto mt-0.5 shrink-0">
           {viewMode === "deployed" ? (
-            <Button
-              onClick={handleEditMode}
-              className="gap-1.5 rounded-lg h-8 px-4 shadow-sm bg-primary text-primary-foreground text-xs font-medium transition-all"
-            >
-              <Pencil className="w-3 h-3" /> Edit
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                onClick={handleTogglePause}
+                className="gap-1.5 rounded-lg h-8 px-4 shadow-sm text-xs font-medium transition-all bg-card"
+              >
+                {workflowData?.status === "PAUSED" ? (
+                  <><Play className="w-3 h-3 text-green-500" /> Activate</>
+                ) : (
+                  <><Pause className="w-3 h-3 text-amber-500" /> Pause</>
+                )}
+              </Button>
+              <Button
+                onClick={handleEditMode}
+                className="gap-1.5 rounded-lg h-8 px-4 shadow-sm bg-primary text-primary-foreground text-xs font-medium transition-all"
+              >
+                <Pencil className="w-3 h-3" /> Edit
+              </Button>
+            </>
           ) : isValid ? (
             <Button
               onClick={handleDeploy}
@@ -608,6 +642,20 @@ export default function WorkflowEditor() {
                 create an action node
               </div>
             </div>
+          </Panel>
+        )}
+        {viewMode === "deployed" && (
+          <Panel
+            position="bottom-center"
+            className="mb-4 pointer-events-auto"
+          >
+            <Button
+              onClick={() => navigate(`/workflows/${display_id}/executions`)}
+              className="gap-2 rounded-full h-11 px-6 shadow-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-bold transition-all border border-border"
+            >
+              <List className="w-4 h-4" />
+              See Executions
+            </Button>
           </Panel>
         )}
       </ReactFlow>

@@ -112,4 +112,31 @@ router.post('/:display_id/cancel', async (req: Request, res: Response): Promise<
   }
 });
 
+/**
+ * GET /api/executions/:display_id
+ * Retrieves a single execution by display_id with all node details.
+ */
+router.get('/:display_id', async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { userId } = getAuth(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const user = await User.findOne({ clerk_id: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Use display_id or _id for fallback
+    let execution = await Execution.findOne({ display_id: req.params.display_id, user_id: user._id }).lean();
+    if (!execution) {
+      execution = await Execution.findOne({ _id: req.params.display_id, user_id: user._id }).lean();
+    }
+    
+    if (!execution) return res.status(404).json({ error: 'Execution not found' });
+
+    return res.status(200).json(execution);
+  } catch (error) {
+    console.error('Error fetching execution:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 export default router;

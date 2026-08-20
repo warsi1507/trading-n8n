@@ -14,6 +14,7 @@ export interface INodeExecution {
   started_at?: Date;
   ended_at?: Date;
   duration_ms?: number;
+  input_data?: any;
   output_data?: any;
   error?: string;
 }

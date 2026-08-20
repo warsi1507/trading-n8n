@@ -168,11 +168,18 @@ router.put('/:display_id', async (req: Request, res: Response): Promise<any> => 
       return res.status(404).json({ error: 'Requested workflow was not found' });
     }
 
-    const { name, description, nodes, edges } = req.body;
+    const { name, description, nodes, edges, status } = req.body;
 
     // Apply metadata updates if provided
     if (name !== undefined) workflow.name = name;
     if (description !== undefined) workflow.description = description;
+
+    // Allow PAUSED/DEPLOYED status toggling if it's already deployed
+    if (status !== undefined) {
+      if ((workflow.status === 'DEPLOYED' || workflow.status === 'PAUSED') && (status === 'DEPLOYED' || status === 'PAUSED')) {
+        workflow.status = status;
+      }
+    }
 
     // Apply graph modifications and execute state management logic
     if (nodes || edges) {

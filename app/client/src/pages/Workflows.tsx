@@ -334,7 +334,7 @@ export default function Workflows() {
       {/* Executions Button */}
       <button
         onClick={() => navigate("/workflows/executions")}
-        className="fixed bottom-[3.5rem] right-4 md:bottom-[4.5rem] md:right-6 h-12 px-6 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 border border-border"
+        className="fixed bottom-16 right-4 md:bottom-20 md:right-6 h-12 w-[160px] bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 border border-border"
       >
         <List size={20} />
         <span>Executions</span>
@@ -343,7 +343,7 @@ export default function Workflows() {
       {/* Floating Action Button */}
       <button
         onClick={createWorkflow}
-        className="fixed bottom-2 right-4 md:bottom-4 md:right-6 h-12 px-6 bg-sky-400 hover:bg-sky-300 text-sky-950 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 group border border-sky-400/20"
+        className="fixed bottom-2 right-4 md:bottom-4 md:right-6 h-12 w-[160px] bg-sky-400 hover:bg-sky-300 text-sky-950 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm transition-colors z-50 group border border-sky-400/20"
       >
         <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
         <span>Workflow</span>

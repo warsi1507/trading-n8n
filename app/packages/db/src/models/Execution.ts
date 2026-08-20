@@ -26,6 +26,9 @@ const nodeExecutionSchema = new Schema<INodeExecution>(
     duration_ms: {
       type: Number,
     },
+    input_data: {
+      type: Schema.Types.Mixed,
+    },
     output_data: {
       type: Schema.Types.Mixed,
     },
