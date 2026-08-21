@@ -12,7 +12,8 @@
     "@trading-n8n/common": "*",
     "@trading-n8n/db": "*",
     "@trading-n8n/logger": "^1.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "ioredis": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

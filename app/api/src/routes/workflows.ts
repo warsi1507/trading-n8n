@@ -1,8 +1,24 @@
 import { Router, Request, Response } from 'express';
 import { clerkMiddleware, getAuth } from '@clerk/express';
 import { Workflow, User, Counter, Execution } from '@trading-n8n/db';
+import Redis from 'ioredis';
 
 const router = Router();
+
+// Lazy-initialized Redis publisher for notifying the executor of workflow changes
+let redisPublisher: Redis | null = null;
+function getRedisPublisher(): Redis {
+  if (!redisPublisher) {
+    redisPublisher = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:6379');
+  }
+  return redisPublisher;
+}
+
+async function notifyWorkflowChanged(): Promise<void> {
+  try {
+    await getRedisPublisher().publish('workflow:changed', Date.now().toString());
+  } catch { /* non-critical */ }
+}
 
 // Apply Clerk middleware to parse session tokens for all workflow routes
 router.use(clerkMiddleware());
@@ -291,6 +307,8 @@ router.post('/:display_id/deploy', async (req: Request, res: Response): Promise<
       { $set: { status: 'CANCELED', ended_at: new Date() } }
     );
 
+    await notifyWorkflowChanged();
+
     res.json(workflow);
   } catch (error) {
     console.error('Deploy error:', error);
@@ -324,6 +342,7 @@ router.post('/:display_id/toggle', async (req: Request, res: Response): Promise<
     }
     
     await workflow.save();
+    await notifyWorkflowChanged();
     res.json(workflow);
   } catch (error) {
     console.error('Toggle error:', error);
@@ -359,6 +378,8 @@ router.post('/:display_id/archive', async (req: Request, res: Response): Promise
       { workflow_id: workflow._id },
       { $set: { workflow_deleted: true } }
     );
+
+    await notifyWorkflowChanged();
 
     res.json(workflow);
   } catch (error) {
