@@ -1,9 +1,8 @@
 <div align="center">
   <br />
   <h1>
-    <img src="app/client/public/logo-dark.svg#gh-dark-mode-only" alt="Logo" width="80" style="vertical-align: middle; margin-right: 10px;" />
-    <img src="app/client/public/logo-light.svg#gh-light-mode-only" alt="Logo" width="80" style="vertical-align: middle; margin-right: 10px;" />
-    <span style="vertical-align: middle;">FlowTrade</span>
+    <img src="app/client/public/readme-logo-dark.svg#gh-dark-mode-only" alt="FlowTrade" width="400" />
+    <img src="app/client/public/readme-logo-light.svg#gh-light-mode-only" alt="FlowTrade" width="400" />
   </h1>
   <p><strong>A high-performance, node-based automation engine for Web3 trading.</strong></p>
   <p>

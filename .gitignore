@@ -19,3 +19,11 @@ yarn-error.log*
 dist/
 build/
 *.tsbuildinfo
+.next/
+out/
+
+# Testing & Caching
+coverage/
+.turbo/
+.vercel/
+.cache/
