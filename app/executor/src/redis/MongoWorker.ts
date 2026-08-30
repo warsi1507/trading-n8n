@@ -129,6 +129,12 @@ export class MongoWorker {
       if (error) update.error = error;
 
       await Execution.findByIdAndUpdate(executionId, { $set: update });
+
+      if (status === 'FAILED') {
+        import('../services/NotificationService').then(({ NotificationService }) => {
+          NotificationService.sendExecutionFailureEmail(executionId, error);
+        });
+      }
     }
   }
 }
