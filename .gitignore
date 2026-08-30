@@ -6,9 +6,6 @@ node_modules/
 .env.*
 !.env.example
 
-# Text files
-*.txt
-
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -17,8 +14,6 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-docs/
 
 # Build outputs
 dist/
