@@ -19,11 +19,13 @@
     "dotenv": "^16.3.1",
     "hyperliquid": "^1.7.7",
     "ioredis": "^6.0.0",
+    "nodemailer": "^9.0.6",
     "tweetnacl": "^1.0.3",
     "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/nodemailer": "^8.0.1",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }

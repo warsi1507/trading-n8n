@@ -15,6 +15,8 @@ interface Execution {
   _id: string;
   display_id: string; // e.g. EXEC-1
   status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELED" | "UNKNOWN";
+  started_at: string;
+  ended_at?: string;
   workflow_id: {
     _id: string;
     display_id: string;

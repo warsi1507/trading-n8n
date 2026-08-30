@@ -29,12 +29,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { Toaster } from 'sonner';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <ClerkThemeWrapper>
         <Router>
           <div className="min-h-screen flex flex-col bg-background text-foreground font-sans antialiased">
+            <Toaster position="top-left" richColors />
             <Header />
             <main className="flex-1">
               <Routes>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Play, ArchiveRestore, Activity } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@clerk/react";
 import {
@@ -91,8 +92,10 @@ export default function Workflows() {
         });
         if (!res.ok) throw new Error("Failed to toggle workflow");
         fetchWorkflows();
+        toast.success(toggleWorkflow.is_active ? "Workflow Deactivated" : "Workflow Activated");
       } catch (err) {
         console.error("Failed to toggle workflow", err);
+        toast.error("Failed to toggle workflow");
       }
       setToggleWorkflow(null);
     }
@@ -106,7 +109,10 @@ export default function Workflows() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
-      window.alert("Warning: Archiving this workflow has immediately canceled any running executions. Please verify your exchange platform for any unmanaged positions.");
+      toast.warning("Executions Canceled", {
+        description: "Archiving this workflow has immediately canceled any running executions. Verify your positions.",
+        duration: 8000
+      });
       setArchiveWorkflow(null);
       setArchiveConfirmName("");
       fetchWorkflows();
@@ -125,8 +131,10 @@ export default function Workflows() {
       });
       setUnarchiveWorkflow(null);
       fetchWorkflows();
+      toast.success("Workflow Restored");
     } catch (err) {
       console.error("Failed to unarchive workflow", err);
+      toast.error("Failed to restore workflow");
     }
   };
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import { toast } from "sonner";
 import {
   ReactFlow,
   applyNodeChanges,
@@ -170,10 +171,13 @@ export default function WorkflowEditor() {
       const data = await res.json();
       setIsValid(data.is_valid);
       if (!data.is_valid) {
-        alert("Validation Failed: " + data.message);
+        toast.error("Validation Failed", { description: data.message });
+      } else {
+        toast.success("Validation Passed");
       }
     } catch (error) {
       console.error("Failed to validate", error);
+      toast.error("Validation Check Failed", { description: "Network error occurred." });
     }
   };
 
@@ -181,7 +185,7 @@ export default function WorkflowEditor() {
     try {
       const token = await getToken();
       const res = await fetch(`/api/workflows/${display_id}/deploy`, {
-        method: 'POST',
+        method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -189,11 +193,18 @@ export default function WorkflowEditor() {
         
         // If it was already deployed and active, warn them about canceled executions
         if (workflowData?.status === "DEPLOYED") {
-          window.alert("Warning: Deploying a new version has immediately canceled any running executions of the old version. Please verify your exchange platform for any unmanaged positions.");
+          toast.warning("Running Executions Canceled", { 
+            description: "Deploying a new version has canceled any running executions of the old version. Verify your positions.",
+            duration: 8000
+          });
         }
+        
+        toast.success("Workflow deployed successfully!");
 
         setViewMode("deployed");
         setWorkflowData(data);
+      } else {
+        toast.error("Failed to deploy workflow");
       }
     } catch (error) {
       console.error("Failed to deploy", error);

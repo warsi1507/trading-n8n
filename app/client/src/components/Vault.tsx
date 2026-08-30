@@ -4,6 +4,7 @@ import { Eye, EyeOff, Copy, Check, Trash2, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import type { CredentialResponse } from "@trading-n8n/common";
 
 export function Vault() {
@@ -64,9 +65,13 @@ export function Vault() {
         setNewName("");
         setNewValue("");
         setShowCreateForm(false);
+        toast.success("Credential saved to Vault");
+      } else {
+        toast.error("Failed to save credential");
       }
     } catch (err) {
       console.error("Failed to create credential", err);
+      toast.error("Network error while saving credential");
     } finally {
       setIsCreating(false);
     }
@@ -85,9 +90,13 @@ export function Vault() {
         setCredentials(credentials.filter(c => c._id !== credToDelete._id));
         setCredToDelete(null);
         setDeleteConfirmName("");
+        toast.success("Credential deleted");
+      } else {
+        toast.error("Failed to delete credential");
       }
     } catch (err) {
       console.error("Failed to delete credential", err);
+      toast.error("Network error while deleting credential");
     } finally {
       setIsDeleting(false);
     }
