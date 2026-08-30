@@ -103,8 +103,6 @@ router.post('/:display_id/cancel', async (req: Request, res: Response): Promise<
     execution.ended_at = new Date();
     await execution.save();
 
-    // TODO: Publish a Redis pub/sub event so the executor engine drops this execution instantly.
-
     return res.status(200).json({ message: 'Execution canceled', execution });
   } catch (error) {
     console.error('Error canceling execution:', error);

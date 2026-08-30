@@ -44,25 +44,25 @@ export class NotificationService {
     if (!this.transporter) return;
 
     try {
-      // 1. Fetch Execution
+      // Fetch Execution
       const execution = await Execution.findById(executionId);
       if (!execution) {
         logger.warn('Cannot send failure email, execution not found', { executionId });
         return;
       }
 
-      // 2. Fetch Workflow
+      // Fetch Workflow
       const workflow = await Workflow.findById(execution.workflow_id);
       const workflowName = workflow ? workflow.name : 'Unknown Workflow';
 
-      // 3. Fetch User
+      // Fetch User
       const user = await User.findById(execution.user_id);
       if (!user || !user.email) {
         logger.warn('Cannot send failure email, user or email not found', { userId: execution.user_id });
         return;
       }
 
-      // 4. Send Email
+      // Send Email
       const info = await this.transporter.sendMail({
         from: '"Trading Engine" <noreply@trading-engine.local>',
         to: user.email,

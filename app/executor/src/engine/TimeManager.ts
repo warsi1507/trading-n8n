@@ -8,18 +8,18 @@ class TimeTriggerManager {
   // Map of workflowId -> NodeJS.Timeout
   private intervals: Map<string, NodeJS.Timeout> = new Map();
 
-  public syncTimers() {
-    // 1. Clear all existing intervals
+  public syncTimers(): void {
+    // Clear all existing intervals
     for (const timer of this.intervals.values()) {
       clearInterval(timer);
     }
     this.intervals.clear();
 
-    // 2. Scan workflowCache for time-triggers
-    const workflows = workflowCache.getAll();
+    // Scan workflowCache for time-triggers
+    const cachedWorkflows = workflowCache.getAll();
     let count = 0;
 
-    for (const wf of workflows) {
+    for (const wf of cachedWorkflows) {
       for (const node of wf.nodes) {
         if (node.type === 'time-trigger' && node.data && node.data.metadata) {
           const metadata = node.data.metadata as any;

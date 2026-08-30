@@ -103,7 +103,7 @@ export default function WorkflowExecutions() {
         setIsLoading(true);
         const token = await getToken();
         
-        // 1. Fetch workflow metadata
+        // Fetch workflow metadata
         const wfRes = await fetch(`/api/workflows/${display_id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -118,12 +118,12 @@ export default function WorkflowExecutions() {
           }
         }
 
-        // 2. Fetch executions list
-        const execRes = await fetch(`/api/executions/workflow/${display_id}`, {
+        // Fetch executions list
+        const res = await fetch(`/api/executions/workflow/${display_id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (execRes.ok) {
-          const execData = await execRes.json();
+        if (res.ok) {
+          const execData = await res.json();
           setExecutions(execData.executions || []);
         }
       } catch (err) {
