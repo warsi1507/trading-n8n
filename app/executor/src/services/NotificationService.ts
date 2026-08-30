@@ -18,9 +18,9 @@ export class NotificationService {
           pass: process.env.SMTP_PASS,
         },
       });
-      logger.info('Initialized real SMTP transport', { host: process.env.SMTP_HOST });
+      logger.info('Initialized SMTP transport', { host: process.env.SMTP_HOST });
     } else {
-      logger.warn('No SMTP credentials found in .env, creating Ethereal test account...');
+      logger.info('SMTP credentials not configured, falling back to Ethereal test account');
       try {
         const testAccount = await nodemailer.createTestAccount();
         this.transporter = nodemailer.createTransport({
@@ -32,7 +32,7 @@ export class NotificationService {
             pass: testAccount.pass,
           },
         });
-        logger.info('Initialized Ethereal test SMTP transport');
+        logger.info('Initialized Ethereal SMTP transport');
       } catch (err) {
         logger.error('Failed to create Ethereal test account', { error: err });
       }
@@ -47,7 +47,7 @@ export class NotificationService {
       // Fetch Execution
       const execution = await Execution.findById(executionId);
       if (!execution) {
-        logger.warn('Cannot send failure email, execution not found', { executionId });
+        logger.warn('Failed to send email: Execution not found', { executionId });
         return;
       }
 
@@ -58,7 +58,7 @@ export class NotificationService {
       // Fetch User
       const user = await User.findById(execution.user_id);
       if (!user || !user.email) {
-        logger.warn('Cannot send failure email, user or email not found', { userId: execution.user_id });
+        logger.warn('Failed to send email: User or email not found', { userId: execution.user_id });
         return;
       }
 
@@ -66,22 +66,22 @@ export class NotificationService {
       const info = await this.transporter.sendMail({
         from: '"Trading Engine" <noreply@trading-engine.local>',
         to: user.email,
-        subject: `⚠️ Execution Failed: ${workflowName}`,
+        subject: `Execution Failed: ${workflowName}`,
         text: `Your workflow "${workflowName}" (Execution ${execution.display_id}) failed.\n\nError: ${errorMsg || 'Unknown error'}\n\nPlease check your dashboard.`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
-            <h2 style="color: #ef4444;">🚨 Workflow Execution Failed</h2>
+            <h2 style="color: #ef4444;">Workflow Execution Failed</h2>
             <p>Your workflow <strong>${workflowName}</strong> (Execution <code>${execution.display_id}</code>) has encountered a failure.</p>
             <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 4px; margin: 24px 0;">
               <code style="color: #991b1b; white-space: pre-wrap;">${errorMsg || 'Unknown error'}</code>
             </div>
             <p>Please log in to your dashboard to view the node logs and investigate.</p>
-            <p style="font-size: 12px; color: #6b7280; margin-top: 32px;">This is an automated message from your Trading Engine.</p>
+            <p style="font-size: 12px; color: #6b7280; margin-top: 32px;">This is an automated message from the Trading Engine.</p>
           </div>
         `,
       });
 
-      logger.info('Failure email sent', { 
+      logger.info('Failure email dispatched', { 
         executionId, 
         to: user.email, 
         messageId: info.messageId 
@@ -91,14 +91,12 @@ export class NotificationService {
       if (info.messageId && !process.env.SMTP_HOST) {
         const previewUrl = nodemailer.getTestMessageUrl(info);
         if (previewUrl) {
-          logger.info('\n======================================================');
-          logger.info('📧 PREVIEW TEST EMAIL HERE: ' + previewUrl);
-          logger.info('======================================================\n');
+          logger.info(`Ethereal email preview available: ${previewUrl}`);
         }
       }
 
     } catch (error: any) {
-      logger.error('Failed to send execution failure email', { executionId, error: error.message });
+      logger.error('Failed to dispatch execution failure email', { executionId, error: error.message });
     }
   }
 }

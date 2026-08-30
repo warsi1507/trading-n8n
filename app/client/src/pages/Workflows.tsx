@@ -105,19 +105,27 @@ export default function Workflows() {
     if (!archiveWorkflow) return;
     try {
       const token = await getToken();
-      await fetch(`/api/workflows/${archiveWorkflow.display_id}/archive`, {
+      const res = await fetch(`/api/workflows/${archiveWorkflow.display_id}/archive`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.warning("Executions Canceled", {
-        description: "Archiving this workflow has immediately canceled any running executions. Verify your positions.",
-        duration: 8000
-      });
+      
+      if (!res.ok) throw new Error("Failed to archive workflow");
+
+      if (archiveWorkflow.is_active || archiveWorkflow.status === 'DEPLOYED') {
+        toast.warning("Executions Canceled", {
+          description: "Archiving this active workflow has canceled any running executions. Verify your positions.",
+          duration: 8000
+        });
+      } else {
+        toast.success("Workflow Archived");
+      }
       setArchiveWorkflow(null);
       setArchiveConfirmName("");
       fetchWorkflows();
     } catch (err) {
       console.error("Failed to archive workflow", err);
+      toast.error("Failed to archive workflow");
     }
   };
 
