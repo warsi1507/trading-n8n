@@ -1,12 +1,9 @@
 <div align="center">
   <br />
   <h1>
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="app/client/public/logo-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="app/client/public/logo-light.svg">
-      <img alt="FlowTrade Logo" src="app/client/public/logo-light.svg" width="120" height="120" style="vertical-align: middle; margin-right: 1px;" />
-    </picture>
-    FlowTrade
+    <img src="app/client/public/logo-dark.svg#gh-dark-mode-only" alt="Logo" width="80" style="vertical-align: middle; margin-right: 10px;" />
+    <img src="app/client/public/logo-light.svg#gh-light-mode-only" alt="Logo" width="80" style="vertical-align: middle; margin-right: 10px;" />
+    <span style="vertical-align: middle;">FlowTrade</span>
   </h1>
   <p><strong>A high-performance, node-based automation engine for Web3 trading.</strong></p>
   <p>
@@ -152,7 +149,3 @@ Security is critical when handling trading API keys.
 1. **Never store plaintext:** The `VaultService` encrypts all credentials using `AES-256-GCM` before saving to MongoDB.
 2. **Execution Context:** When a workflow executes, the engine pulls the encrypted payload from MongoDB, decrypts it strictly within RAM, uses it to sign the ED25519 payload, and immediately discards it.
 3. **Strict Validation:** All incoming payloads are validated at runtime using `zod`.
-
-## License
-
-This project is licensed under the MIT License.
