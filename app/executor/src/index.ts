@@ -5,6 +5,8 @@ import path from "path";
 import { getRedisClient } from "./redis/client";
 import { MongoWorker } from "./redis/MongoWorker";
 import { TriggerLoader } from "./cache/TriggerLoader";
+import { wsManager } from "./ws/WebSocketManager";
+import { timeManager } from "./engine/TimeManager";
 import Redis from "ioredis";
 
 const logger = createLogger("EXECUTOR");
@@ -46,6 +48,8 @@ async function startExecutor() {
   const shutdown = async () => {
     logger.info('Shutting down gracefully...');
     worker.stop();
+    timeManager.disconnect();
+    wsManager.disconnect();
     subscriber.disconnect();
     redis.disconnect();
     process.exit(0);

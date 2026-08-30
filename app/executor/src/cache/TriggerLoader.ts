@@ -4,6 +4,7 @@ import { workflowCache } from './WorkflowCache';
 import { wsManager } from '../ws/WebSocketManager';
 import { VaultService } from '../services/VaultService';
 import { createLogger } from '@trading-n8n/logger';
+import { timeManager } from '../engine/TimeManager';
 
 const logger = createLogger('TRIGGER_LOADER');
 
@@ -67,8 +68,9 @@ export class TriggerLoader {
         workflows: workflows.length,
       });
 
-      // Tell the WebSocket manager to update its subscriptions based on the new cache
+      // Tell managers to update their logic based on the new cache
       wsManager.syncSubscriptions();
+      timeManager.syncTimers();
 
     } catch (err: any) {
       logger.error('Failed to load triggers from MongoDB', { error: err.message });

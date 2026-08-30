@@ -144,7 +144,12 @@ export default function GlobalExecutions() {
                 </div>
 
                 {/* Status & Actions */}
-                <div className="ml-auto shrink-0 flex items-center justify-end gap-2">
+                <div className="ml-auto shrink-0 flex items-center justify-end gap-3">
+                  {exec.status !== 'RUNNING' && exec.status !== 'PENDING' && (
+                    <span className="hidden sm:block text-xs text-muted-foreground tabular-nums">
+                      {new Date(exec.ended_at || exec.started_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  )}
                   <StatusBadge status={exec.status} />
                 </div>
               </CardContent>

@@ -12,12 +12,16 @@ import { PriceTrigger } from "@/nodes/triggers/PriceTrigger";
 import { TimeTrigger } from "@/nodes/triggers/TimeTrigger";
 import { Backpack } from "@/nodes/actions/Backpack";
 import type { Workflow, IExecution, INodeExecution } from "@trading-n8n/common";
+import { Hyperliquid } from "@/nodes/actions/Hyperliquid";
+import { Lighter } from "@/nodes/actions/Lighter";
 import type { Node, Edge } from "@xyflow/react";
 
 const nodeTypes = {
   "price-trigger": PriceTrigger,
   "time-trigger": TimeTrigger,
   backpack: Backpack,
+  hyperliquid: Hyperliquid,
+  lighter: Lighter,
 };
 
 function JsonViewer({ data, name = "data" }: { data: any; name?: string }) {

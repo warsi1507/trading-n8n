@@ -4,7 +4,10 @@ import { ExecutionContext } from './Context';
 import { RedisLogger } from '../redis/RedisLogger';
 import { VaultService } from '../services/VaultService';
 import { workflowCache } from '../cache/WorkflowCache';
-import type { AppNode, TradingMetadata } from '@trading-n8n/common';
+import type { AppNode, TradingMetadata, SupportedAsset } from '@trading-n8n/common';
+import * as backpackExecutor from '../executors/backpack';
+import * as hyperliquidExecutor from '../executors/hyperliquid';
+import * as lighterExecutor from '../executors/lighter';
 
 const logger = createLogger('ENGINE');
 
@@ -183,7 +186,17 @@ export class WorkflowEngine {
     if (data.kind === 'action') {
       const metadata = data.metadata as unknown as TradingMetadata;
 
-      // Load API keys from RAM (pre-loaded at boot)
+      if (!metadata.platform) {
+        throw new Error(`Action node "${data.name}" has no platform configured`);
+      }
+      if (!metadata.symbol) {
+        throw new Error(`Action node "${data.name}" has no asset symbol configured`);
+      }
+      if (!metadata.qty || metadata.qty <= 0) {
+        throw new Error(`Action node "${data.name}" has an invalid quantity`);
+      }
+
+      // Decrypt all credential values from the Vault (served from RAM — zero latency)
       const decryptedKeys: Record<string, string> = {};
       if (metadata.credentials) {
         for (const [keyName, credId] of Object.entries(metadata.credentials)) {
@@ -191,18 +204,35 @@ export class WorkflowEngine {
         }
       }
 
-      logger.info('Executing Action', { platform: metadata.platform, symbol: metadata.symbol });
-
-      // TODO: Replace with actual exchange API call
-      return {
-        success: true,
-        platform: metadata.platform,
-        action: metadata.type,
+      const order = {
+        asset: metadata.symbol as SupportedAsset,
         qty: metadata.qty,
-        simulatedOrderId: `mock-order-${Math.floor(Math.random() * 10000)}`
+        type: metadata.type,
       };
+
+      logger.info('Dispatching trade order', {
+        platform: metadata.platform,
+        asset: order.asset,
+        type: order.type,
+        qty: order.qty,
+      });
+
+      switch ((metadata.platform as string)?.toLowerCase()) {
+        case 'backpack':
+          return await backpackExecutor.execute(order, decryptedKeys);
+
+        case 'hyperliquid':
+          return await hyperliquidExecutor.execute(order, decryptedKeys);
+
+        case 'lighter':
+        case 'lighter.xyz':
+          return await lighterExecutor.execute(order, decryptedKeys);
+
+        default:
+          throw new Error(`Unsupported platform: ${metadata.platform}`);
+      }
     }
 
-    throw new Error(`Unsupported node type: ${type}`);
+    throw new Error(`Unsupported node kind: ${data.kind}`);
   }
 }

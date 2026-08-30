@@ -21,6 +21,10 @@ class WorkflowCache {
     return this.cache.get(workflowId);
   }
 
+  getAll(): CachedWorkflow[] {
+    return Array.from(this.cache.values());
+  }
+
   remove(workflowId: string): void {
     this.cache.delete(workflowId);
   }
