@@ -8,8 +8,10 @@ const ResizablePanelGroup = ({
   direction,
   ...props
 }: React.ComponentProps<typeof PanelGroup> & { direction?: "horizontal" | "vertical" }) => (
+  // @ts-ignore - Vercel resolves a different version of react-resizable-panels which renames direction to orientation
   <PanelGroup
     direction={direction}
+    orientation={direction}
     className={cn(
       "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
       className
