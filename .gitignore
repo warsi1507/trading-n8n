@@ -27,3 +27,5 @@ coverage/
 .turbo/
 .vercel/
 .cache/
+
+*.txt
