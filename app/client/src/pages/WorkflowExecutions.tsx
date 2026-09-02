@@ -247,7 +247,7 @@ export default function WorkflowExecutions() {
       </div>
 
       <div className="flex-1 overflow-hidden relative">
-        <ResizablePanelGroup direction="horizontal">
+        <ResizablePanelGroup orientation="horizontal">
           
           {/* Left Panel: ReactFlow Canvas */}
           <ResizablePanel defaultSize={65} minSize={30}>
