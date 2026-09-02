@@ -38,7 +38,7 @@ export default function GlobalExecutions() {
     try {
       setLoading(true);
       const token = await getToken();
-      const res = await fetch(`/api/executions?page=${pageToFetch}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/executions?page=${pageToFetch}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

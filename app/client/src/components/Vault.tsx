@@ -27,7 +27,7 @@ export function Vault() {
   const fetchCredentials = async () => {
     try {
       const token = await getToken();
-      const res = await fetch("/api/credentials", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/credentials`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -50,7 +50,7 @@ export function Vault() {
     setIsCreating(true);
     try {
       const token = await getToken();
-      const res = await fetch("/api/credentials", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/credentials`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ export function Vault() {
     setIsDeleting(true);
     try {
       const token = await getToken();
-      const res = await fetch(`/api/credentials/${credToDelete._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/credentials/${credToDelete._id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

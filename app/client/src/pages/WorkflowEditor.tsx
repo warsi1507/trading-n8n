@@ -96,7 +96,7 @@ export default function WorkflowEditor() {
       if (!display_id) return;
       try {
         const token = await getToken();
-        const res = await fetch(`/api/workflows/${display_id}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to load workflow");
@@ -130,7 +130,7 @@ export default function WorkflowEditor() {
   const saveWorkflowMetadata = async (updates: { name?: string, description?: string }) => {
     try {
       const token = await getToken();
-      await fetch(`/api/workflows/${display_id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -147,7 +147,7 @@ export default function WorkflowEditor() {
     if (isReadOnly) return;
     try {
       const token = await getToken();
-      await fetch(`/api/workflows/${display_id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -164,7 +164,7 @@ export default function WorkflowEditor() {
   const handleValidate = async () => {
     try {
       const token = await getToken();
-      const res = await fetch(`/api/workflows/${display_id}/validate`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}/validate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -184,7 +184,7 @@ export default function WorkflowEditor() {
   const handleDeploy = async () => {
     try {
       const token = await getToken();
-      const res = await fetch(`/api/workflows/${display_id}/deploy`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}/deploy`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -223,7 +223,7 @@ export default function WorkflowEditor() {
   const handleArchive = async () => {
     try {
       const token = await getToken();
-      await fetch(`/api/workflows/${display_id}/archive`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}/archive`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -262,7 +262,7 @@ export default function WorkflowEditor() {
     try {
       const token = await getToken();
       const newStatus = workflowData.status === "PAUSED" ? "DEPLOYED" : "PAUSED";
-      const res = await fetch(`/api/workflows/${display_id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

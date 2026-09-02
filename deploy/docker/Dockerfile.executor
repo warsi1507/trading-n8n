@@ -1,0 +1,50 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy root package files
+COPY package.json package-lock.json ./
+
+# Copy all package.json files for workspaces
+COPY app/executor/package.json ./app/executor/
+COPY app/packages/common/package.json ./app/packages/common/
+COPY app/packages/db/package.json ./app/packages/db/
+COPY app/packages/logger/package.json ./app/packages/logger/
+
+# Install dependencies
+RUN npm ci
+
+# Copy the rest of the relevant source code
+COPY app/packages ./app/packages
+COPY app/executor ./app/executor
+
+# Build shared packages
+RUN cd app/packages/common && npm run build
+RUN cd app/packages/db && npm run build
+RUN cd app/packages/logger && npm run build
+
+# Build Executor
+RUN cd app/executor && npm run build
+
+# Production Stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Only copy production files
+COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/app/executor/package.json ./app/executor/
+COPY --from=builder /app/app/executor/dist ./app/executor/dist
+
+COPY --from=builder /app/app/packages/common/package.json ./app/packages/common/
+COPY --from=builder /app/app/packages/common/dist ./app/packages/common/dist
+
+COPY --from=builder /app/app/packages/db/package.json ./app/packages/db/
+COPY --from=builder /app/app/packages/db/dist ./app/packages/db/dist
+
+COPY --from=builder /app/app/packages/logger/package.json ./app/packages/logger/
+COPY --from=builder /app/app/packages/logger/dist ./app/packages/logger/dist
+
+# Start Executor
+CMD ["node", "app/executor/dist/index.js"]

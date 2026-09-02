@@ -15,7 +15,13 @@ import workflowRoutes from './routes/workflows';
 import credentialsRoutes from './routes/credentials';
 import executionRoutes from './routes/executions';
 
-app.use(cors());
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || '*',
+  optionsSuccessStatus: 200,
+  credentials: true
+};
+app.use(cors(corsOptions));
 
 // webhook route must be registered BEFORE express.json() because svix needs the raw body
 app.use('/api/webhooks', webhookRoutes);

@@ -104,7 +104,7 @@ export default function WorkflowExecutions() {
         const token = await getToken();
         
         // Fetch workflow metadata
-        const wfRes = await fetch(`/api/workflows/${display_id}`, {
+        const wfRes = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${display_id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (wfRes.ok) {
@@ -119,7 +119,7 @@ export default function WorkflowExecutions() {
         }
 
         // Fetch executions list
-        const res = await fetch(`/api/executions/workflow/${display_id}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/executions/workflow/${display_id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
@@ -145,7 +145,7 @@ export default function WorkflowExecutions() {
       }
       try {
         const token = await getToken();
-        const res = await fetch(`/api/executions/${execIdParam}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/executions/${execIdParam}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {

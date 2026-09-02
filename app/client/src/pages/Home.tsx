@@ -17,7 +17,7 @@ export default function Home() {
 
     try {
       const token = await getToken();
-      const res = await fetch("/api/workflows", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -100,7 +100,7 @@ export function ActionSheet({
       try {
         const token = await getToken();
         if (!token) return;
-        const res = await fetch("/api/credentials", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/credentials`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {

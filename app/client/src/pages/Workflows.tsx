@@ -61,7 +61,7 @@ export default function Workflows() {
     try {
       setIsLoading(true);
       const token = await getToken();
-      const res = await fetch(`/api/workflows?tab=${activeTab}&page=${page}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows?tab=${activeTab}&page=${page}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -86,7 +86,7 @@ export default function Workflows() {
     if (toggleWorkflow) {
       try {
         const token = await getToken();
-        const res = await fetch(`/api/workflows/${toggleWorkflow.display_id}/toggle`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${toggleWorkflow.display_id}/toggle`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -105,7 +105,7 @@ export default function Workflows() {
     if (!archiveWorkflow) return;
     try {
       const token = await getToken();
-      const res = await fetch(`/api/workflows/${archiveWorkflow.display_id}/archive`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${archiveWorkflow.display_id}/archive`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -133,7 +133,7 @@ export default function Workflows() {
     if (!unarchiveWorkflow) return;
     try {
       const token = await getToken();
-      await fetch(`/api/workflows/${unarchiveWorkflow.display_id}/unarchive`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows/${unarchiveWorkflow.display_id}/unarchive`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -154,7 +154,7 @@ export default function Workflows() {
   const createWorkflow = async () => {
     try {
       const token = await getToken();
-      const res = await fetch("/api/workflows", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/workflows`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
