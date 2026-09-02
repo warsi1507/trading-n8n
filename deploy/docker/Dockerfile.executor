@@ -35,16 +35,16 @@ WORKDIR /app
 COPY --from=builder /build/package.json /build/package-lock.json ./
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/executor/package.json ./executor/
-COPY --from=builder /build/executor/dist ./executor/dist
+COPY --from=builder /build/executor/src ./executor/src
 
 COPY --from=builder /build/packages/common/package.json ./packages/common/
-COPY --from=builder /build/packages/common/dist ./packages/common/dist
+COPY --from=builder /build/packages/common/src ./packages/common/src
 
 COPY --from=builder /build/packages/db/package.json ./packages/db/
-COPY --from=builder /build/packages/db/dist ./packages/db/dist
+COPY --from=builder /build/packages/db/src ./packages/db/src
 
 COPY --from=builder /build/packages/logger/package.json ./packages/logger/
-COPY --from=builder /build/packages/logger/dist ./packages/logger/dist
+COPY --from=builder /build/packages/logger/src ./packages/logger/src
 
 # Start Executor
-CMD ["node", "executor/dist/index.js"]
+CMD ["npx", "tsx", "executor/src/index.ts"]
