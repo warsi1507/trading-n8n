@@ -18,10 +18,10 @@ RUN npm ci
 COPY app/packages ./packages
 COPY app/api ./api
 
-# Build shared packages first
+# Build shared packages first (order matters!)
 RUN cd packages/common && npm run build
-RUN cd packages/db && npm run build
 RUN cd packages/logger && npm run build
+RUN cd packages/db && npm run build
 
 # Build API
 RUN cd api && npm run build

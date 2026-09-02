@@ -18,10 +18,10 @@ RUN npm ci
 COPY app/packages ./packages
 COPY app/executor ./executor
 
-# Build shared packages
+# Build shared packages (order matters!)
 RUN cd packages/common && npm run build
-RUN cd packages/db && npm run build
 RUN cd packages/logger && npm run build
+RUN cd packages/db && npm run build
 
 # Build Executor
 RUN cd executor && npm run build
