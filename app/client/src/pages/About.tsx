@@ -13,7 +13,6 @@ import {
   Zap, 
   ArrowRight,
   Globe,
-  TrendingUp,
   Layers,
   Blocks
 } from "lucide-react";
